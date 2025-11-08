@@ -1,4 +1,4 @@
-# Metis - Modern Bootstrap 5 Admin Dashboard Template
+# Metis - Modern Bootstrap 5 Admin Dashboard Template cd: Aigars Silkalns
 
 > A completely modernized, powerful, and free Bootstrap 5 admin dashboard template built with cutting-edge web technologies.
 
