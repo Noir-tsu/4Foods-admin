@@ -36,6 +36,257 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
     
+    <script>
+    // API base URL
+    const API_BASE = 'http://localhost:5000/api';
+
+    // Authentication token (you'll need to implement login)
+    let authToken = localStorage.getItem('authToken');
+
+    // Common headers for API requests
+    const getHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${authToken}`
+    });
+
+    // Dashboard data management
+    class DashboardManager {
+    constructor() {
+        this.isLoading = false;
+    }
+
+    async loadDashboardData() {
+        try {
+        this.showLoading();
+        
+        const [overview, activities, orders] = await Promise.all([
+            this.fetchOverview(),
+            this.fetchRecentActivity(),
+            this.fetchRecentOrders()
+        ]);
+        
+        this.updateOverviewCards(overview);
+        this.updateRecentActivity(activities);
+        this.updateRecentOrders(orders);
+        
+        this.hideLoading();
+        } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        this.showError('Failed to load dashboard data');
+        this.hideLoading();
+        }
+    }
+
+    async fetchOverview() {
+        const response = await fetch(`${API_BASE}/dashboard/overview`, {
+        headers: getHeaders()
+        });
+        if (!response.ok) throw new Error('Failed to fetch overview');
+        return response.json();
+    }
+
+    async fetchRecentActivity() {
+        const response = await fetch(`${API_BASE}/dashboard/recent-activity`, {
+        headers: getHeaders()
+        });
+        if (!response.ok) throw new Error('Failed to fetch recent activity');
+        return response.json();
+    }
+
+    async fetchRecentOrders() {
+        const response = await fetch(`${API_BASE}/dashboard/recent-orders`, {
+        headers: getHeaders()
+        });
+        if (!response.ok) throw new Error('Failed to fetch recent orders');
+        return response.json();
+    }
+
+    async refreshData() {
+        try {
+        // Show refreshing indicator
+        const refreshBtn = document.querySelector('[title="Refresh data"]');
+        const icon = refreshBtn.querySelector('i');
+        icon.classList.add('icon-spin');
+        
+        // Refresh dashboard data
+        const response = await fetch(`${API_BASE}/dashboard/refresh`, {
+            method: 'POST',
+            headers: getHeaders()
+        });
+        
+        if (!response.ok) throw new Error('Refresh failed');
+        
+        // Reload all data
+        await this.loadDashboardData();
+        
+        // Show success message
+        this.showToast('Data refreshed successfully', 'success');
+        
+        } catch (error) {
+        console.error('Error refreshing data:', error);
+        this.showToast('Failed to refresh data', 'error');
+        } finally {
+        const refreshBtn = document.querySelector('[title="Refresh data"]');
+        const icon = refreshBtn.querySelector('i');
+        icon.classList.remove('icon-spin');
+        }
+    }
+
+    updateOverviewCards(data) {
+        // Update revenue card
+        const revenueElement = document.querySelector('.stats-card:nth-child(1) h3');
+        const revenuePercentage = document.querySelector('.stats-card:nth-child(1) small');
+        revenueElement.textContent = `$${data.revenue.current.toLocaleString()}`;
+        revenuePercentage.innerHTML = this.formatPercentage(data.revenue.percentage);
+        
+        // Update other cards similarly...
+        // Orders
+        const ordersElement = document.querySelector('.stats-card:nth-child(2) h3');
+        const ordersPercentage = document.querySelector('.stats-card:nth-child(2) small');
+        ordersElement.textContent = data.orders.current.toLocaleString();
+        ordersPercentage.innerHTML = this.formatPercentage(data.orders.percentage);
+        
+        // Users
+        const usersElement = document.querySelector('.stats-card:nth-child(3) h3');
+        const usersPercentage = document.querySelector('.stats-card:nth-child(3) small');
+        usersElement.textContent = data.users.current.toLocaleString();
+        usersPercentage.innerHTML = this.formatPercentage(data.users.percentage);
+        
+        // Shops
+        const shopsElement = document.querySelector('.stats-card:nth-child(4) h3');
+        const shopsPercentage = document.querySelector('.stats-card:nth-child(4) small');
+        shopsElement.textContent = data.shops.current.toLocaleString();
+        shopsPercentage.innerHTML = this.formatPercentage(data.shops.percentage);
+        
+        // Shippers
+        const shippersElement = document.querySelector('.stats-card:nth-child(5) h3');
+        const shippersPercentage = document.querySelector('.stats-card:nth-child(5) small');
+        shippersElement.textContent = data.shippers.current.toLocaleString();
+        shippersPercentage.innerHTML = this.formatPercentage(data.shippers.percentage);
+    }
+
+    updateRecentActivity(activities) {
+        const activityFeed = document.querySelector('.activity-feed');
+        activityFeed.innerHTML = activities.map(activity => `
+        <div class="activity-item">
+            <div class="activity-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-${this.getActivityIcon(activity.type)}"></i>
+            </div>
+            <div class="activity-content">
+            <p class="mb-1">${activity.description}</p>
+            <small class="text-muted">${this.formatTime(activity.createdAt)}</small>
+            </div>
+        </div>
+        `).join('');
+    }
+
+    updateRecentOrders(orders) {
+        const ordersTable = document.querySelector('.table tbody');
+        ordersTable.innerHTML = orders.map(order => `
+        <tr>
+            <td>${order.orderId}</td>
+            <td>${order.customerId?.name || 'Unknown Customer'}</td>
+            <td>$${order.amount}</td>
+            <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+            <td>${this.formatDate(order.createdAt)}</td>
+        </tr>
+        `).join('');
+    }
+
+    formatPercentage(percentage) {
+        const isPositive = percentage >= 0;
+        const arrow = isPositive ? 'arrow-up' : 'arrow-down';
+        const colorClass = isPositive ? 'percentage-up' : 'percentage-down';
+        return `<i class="bi bi-${arrow}"></i> ${Math.abs(percentage)}% from last month`;
+    }
+
+    getActivityIcon(type) {
+        const icons = {
+        user: 'person-plus',
+        order: 'bag-check',
+        system: 'gear',
+        payment: 'currency-dollar',
+        delivery: 'truck'
+        };
+        return icons[type] || 'circle';
+    }
+
+    formatTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} minutes ago`;
+        if (diffHours < 24) return `${diffHours} hours ago`;
+        if (diffDays === 1) return 'Yesterday';
+        return `${diffDays} days ago`;
+    }
+
+    formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+        });
+    }
+
+    showLoading() {
+        document.getElementById('loading-screen').style.display = 'flex';
+    }
+
+    hideLoading() {
+        document.getElementById('loading-screen').style.display = 'none';
+    }
+
+    showError(message) {
+        this.showToast(message, 'error');
+    }
+
+    showToast(message, type = 'info') {
+        // Implement toast notification
+        console.log(`${type.toUpperCase()}: ${message}`);
+    }
+    }
+
+    // Initialize dashboard when page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+    const dashboard = new DashboardManager();
+    window.dashboard = dashboard; // Make it globally accessible
+    
+    // Load initial data
+    await dashboard.loadDashboardData();
+    
+    // Set up refresh button
+    const refreshBtn = document.querySelector('[title="Refresh data"]');
+    refreshBtn.addEventListener('click', () => dashboard.refreshData());
+    
+    // Update "New Item" button to "Order Approval"
+    const newItemBtn = document.querySelector('.btn-primary');
+    newItemBtn.innerHTML = '<i class="bi bi-list-check me-2"></i>Order Approval';
+    newItemBtn.addEventListener('click', () => {
+        // Redirect to order approval page or open modal
+        window.location.href = '/order-approval.html';
+    });
+    });
+
+    // Add CSS for loading spinner
+    const style = document.createElement('style');
+    style.textContent = `
+    .icon-spin {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    `;
+    document.head.appendChild(style);
+    </script>
+
     <style>
         :root {
             --primary: #6366f1;
