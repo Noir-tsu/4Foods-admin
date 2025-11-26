@@ -1,0 +1,135 @@
+Cấu trúc thư mục
+4Foods-admin/
+├── src-modern/           # 📝 Mã nguồn chính (development)
+├── dist-modern/          # 🎁 Tệp build production
+├── package.json          # ⚙️ Cấu hình dependencies
+├── vite.config.js        # ⚙️ Cấu hình build tool
+├── README.md             # 📚 Hướng dẫn dự án
+├── CHANGELOG.md          # 📝 Lịch sử thay đổi
+└── LICENSE.md            # ⚖️ Giấy phép MIT
+
+
+SRC-MODERN - THÀNH PHẦN CHÍNH
+
+A. HTML Pages (18 trang chính)
+Trang	Mô tả
+index.html	Trang Dashboard chính - Tổng quan dữ liệu
+analytics.html	Phân tích chi tiết, biểu đồ, KPI
+users.html	Quản lý người dùng, CRUD, danh sách
+products.html	Quản lý sản phẩm, danh sách, tìm kiếm
+orders.html	Quản lý đơn hàng, trạng thái, theo dõi
+calendar.html	Lịch sự kiện, quản lý lịch
+messages.html	Giao diện chat, tin nhắn
+reports.html	Báo cáo, bảng dữ liệu, xuất file
+files.html	Quản lý file, trình duyệt tệp
+elements.html	Thư viện component UI
+elements-alerts.html	Component cảnh báo
+elements-badges.html	Nhãn, badges
+elements-buttons.html	Các loại nút bấm
+elements-cards.html	Thẻ (card) component
+elements-forms.html	Form input components
+elements-modals.html	Cửa sổ modal
+elements-tables.html	Bảng dữ liệu
+settings.html	Cài đặt hệ thống
+security.html	Bảo mật, quyền hạn
+help.html	Trợ giúp, FAQ
+
+
+B. Scripts (JavaScript/ES6+ Modules)
+📂 main.js - Entry Point chính
+Chức năng:
+- Import Bootstrap 5 components
+- Khởi tạo Alpine.js (reactive framework)
+- Quản lý lifecycle ứng dụng
+- Nạp CSS/SCSS
+- Khởi tạo các managers chính
+
+
+📂 /scripts/components/ - Page-specific Components (15 file)
+File	Chức năng
+dashboard.js	Quản lý dashboard, biểu đồ Chart.js & ApexCharts
+users.js	CRUD người dùng, form, danh sách
+products.js	Quản lý sản phẩm, bộ lọc, tìm kiếm
+orders.js	Xử lý đơn hàng, trạng thái
+analytics.js	Thống kê, dữ liệu, biểu đồ nâng cao
+calendar.js	Lịch sự kiện, tương tác
+messages.js	Giao diện chat, tin nhắn
+reports.js	Báo cáo, bảng dữ liệu
+files.js	Upload, download, quản lý file
+settings.js	Cài đặt, tùy chỉnh
+security.js	Bảo mật, quyền hạn
+help.js	FAQ, hỗ trợ
+elements.js	UI component library
+forms.js	Form validation, submission
+sidebar.js	Thanh bên, navigation
+
+📂 /scripts/utils/ - Utility Functions (3 file)
+File	Chức năng
+theme-manager.js	🎨 Chuyển đổi dark/light mode, lưu vào localStorage
+notifications.js	🔔 Toast notifications, SweetAlert2 integration
+icon-manager.js	🎨 Quản lý icon Lucide, preload icon
+
+C. Styles (SCSS - Tổ chức theo BEM/SMACSS)
+📂 /styles/scss/abstracts/ - Biến & mixin
+_variables.scss      → Màu, độ rộng, font, breakpoint
+_mixins.scss         → Hỗ trợ responsive, animation
+_utilities.scss      → Tiện ích CSS tùy chỉnh
+
+📂 /styles/scss/layout/ - Bố cục chính
+_header.scss    → Header, navigation bar
+_sidebar.scss   → Thanh bên menu
+_main.scss      → Nội dung chính
+_footer.scss    → Footer
+
+📂 /styles/scss/components/ - UI Components
+_cards.scss          → Thẻ card
+_buttons.scss        → Nút bấm
+_forms.scss          → Form input
+_tables.scss         → Bảng dữ liệu
+_modals.scss         → Cửa sổ modal
+_navigation.scss     → Navigation menu
+_sidebar.scss        → Sidebar styling
+_hamburger.scss      → Menu mobile
+_toggle-switches.scss → Toggle switches
+_icons.scss          → Icon styling
+_charts.scss         → Biểu đồ styling
+_header-buttons.scss → Nút header
+
+📂 /styles/scss/pages/ - Page-specific Styles
+Mỗi trang có styling riêng:
+_dashboard.scss, _users.scss, _products.scss,
+_orders.scss, _analytics.scss, _calendar.scss,
+_messages.scss, _reports.scss, _files.scss,
+_settings.scss, _security.scss, _help.scss,
+_elements.scss, _login.scss, _errors.scss
+
+📂 /styles/scss/themes/ - Theme Variants
+_dark.scss   → Chế độ tối
+_light.scss  → Chế độ sáng
+
+📂 main.scss - Entry Point SCSS
+Quy trình import:
+1. Bootstrap functions
+2. Custom variables & mixins
+3. Bootstrap variables & maps
+4. Bootstrap icons
+5. Bootstrap components
+6. Custom layout styles
+7. Custom component styles
+8. Page-specific styles
+9. Theme variants
+
+D. Assets
+/assets/
+├── /icons/      → SVG icon files
+└── /images/     → PNG, JPG images
+
+📦 DIST-MODERN - PRODUCTION BUILD
+Tệp đã được build tối ưu:
+├── *.html              → Tệp HTML minified
+├── /assets/            → Tệp assets đã tối ưu
+│   ├── *.js            → JavaScript bundles (minified + hashed)
+│   ├── *.css           → CSS files (minified + hashed)
+│   └── manifest.json   → PWA manifest
+
+
