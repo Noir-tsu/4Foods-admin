@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs';
+import { getJSON } from '../utils/api.js';
 
 document.addEventListener('alpine:init', () => {
   Alpine.data('productTable', () => ({
@@ -26,7 +27,11 @@ document.addEventListener('alpine:init', () => {
     categoryStats: [],
 
     init() {
-      this.loadSampleData();
+      if (import.meta.env.VITE_API_BASE) {
+        this.loadProductsFromAPI();
+      } else {
+        this.loadSampleData();
+      }
       this.filterProducts();
       this.calculateStats();
       
@@ -34,6 +39,19 @@ document.addEventListener('alpine:init', () => {
       setTimeout(() => {
         this.initCharts();
       }, 500);
+    },
+
+    async loadProductsFromAPI() {
+      this.isLoading = true;
+      try {
+        const data = await getJSON('/api/products');
+        this.products = data.products || data;
+      } catch (err) {
+        console.error('Load products failed', err);
+        this.loadSampleData();
+      } finally {
+        this.isLoading = false;
+      }
     },
 
     loadSampleData() {

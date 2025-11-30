@@ -23,6 +23,16 @@ app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/dashboard', require('./routes/dashboard'));
 app.use('/api/stats', require('./routes/stats'));
+app.use('/api/categories', require('./routes/categories'));
+app.use('/api/shops', require('./routes/shops'));
+app.use('/api/carts', require('./routes/carts'));
+app.use('/api/conversations', require('./routes/conversations'));
+app.use('/api/messages', require('./routes/messages'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/otps', require('./routes/otps'));
+app.use('/api/loyalty', require('./routes/loyalties'));
+app.use('/api/vouchers', require('./routes/vouchers'));
+app.use('/api/admin', require('./routes/admin'));
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const ordersController = require('../controllers/ordersController');
+const ordersController = require('../controller/ordersController');
 const auth = require('../middleware/auth');
 
 // Apply auth middleware to all routes
-router.use(auth);
+router.use(auth());
 
 // Order management routes
 router.get('/', ordersController.getAllOrders);

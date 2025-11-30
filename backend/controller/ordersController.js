@@ -11,7 +11,10 @@ exports.getAllOrders = async (req, res) => {
     const orders = await Order.find(filter)
       .sort({ [sortBy]: sortOrder === 'desc' ? -1 : 1 })
       .limit(limit * 1)
-      .skip((page - 1) * limit);
+      .skip((page - 1) * limit)
+      .populate('customerId', 'name email')
+      .populate('shopId', 'name');
+      
     
     const total = await Order.countDocuments(filter);
     
@@ -31,7 +34,9 @@ exports.getPendingOrders = async (req, res) => {
   try {
     const orders = await Order.find({ status: 'pending' })
       .sort({ createdAt: -1 })
-      .limit(50);
+      .limit(50)
+      .populate('customerId', 'name email')
+      .populate('shopId', 'name');
     
     res.json(orders);
   } catch (error) {
@@ -42,7 +47,7 @@ exports.getPendingOrders = async (req, res) => {
 // Get single order
 exports.getOrderById = async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(req.params.id).populate('customerId', 'name email').populate('shopId', 'name');
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }

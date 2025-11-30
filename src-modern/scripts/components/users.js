@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs';
+import { getJSON } from '../utils/api.js';
 
 document.addEventListener('alpine:init', () => {
   Alpine.data('userTable', () => ({
@@ -15,14 +16,32 @@ document.addEventListener('alpine:init', () => {
     isLoading: false,
 
     init() {
-      this.loadSampleData();
+            // Try loading real data from API; fallback to sample data
+            if (import.meta.env.VITE_API_BASE) {
+                this.loadUsersFromAPI();
+            } else {
+                this.loadSampleData();
+            }
       this.filterUsers();
       this.$nextTick(() => {
         this.initCharts();
       });
     },
 
-    loadSampleData() {
+        async loadUsersFromAPI() {
+            this.isLoading = true;
+            try {
+                const data = await getJSON('/api/users');
+                this.users = data.users || data;
+            } catch (err) {
+                console.error('Load users failed', err);
+                this.loadSampleData();
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        loadSampleData() {
         this.users = [
         {
             id: 1,

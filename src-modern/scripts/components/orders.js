@@ -1,4 +1,5 @@
 import Alpine from 'alpinejs';
+import { getJSON } from '../utils/api.js';
 
 document.addEventListener('alpine:init', () => {
   Alpine.data('orderTable', () => ({
@@ -26,7 +27,11 @@ document.addEventListener('alpine:init', () => {
     statusStats: [],
 
     init() {
-      this.loadSampleData();
+      if (import.meta.env.VITE_API_BASE) {
+        this.loadOrdersFromAPI();
+      } else {
+        this.loadSampleData();
+      }
       this.filterOrders();
       this.calculateStats();
       
@@ -34,6 +39,31 @@ document.addEventListener('alpine:init', () => {
       setTimeout(() => {
         this.initCharts();
       }, 500);
+    },
+
+    async loadOrdersFromAPI() {
+      this.isLoading = true;
+      try {
+        const data = await getJSON(`/api/orders`);
+        // data may include 'orders' and meta fields
+        const ordersData = data.orders || data;
+        this.orders = ordersData.map(o => ({
+          id: o._id,
+          orderNumber: o.orderId || o._id,
+          customer: { name: o.customerId?.name || 'Customer', email: o.customerId?.email || '' },
+          items: o.items?.map(it => ({ name: it.productId?.name || it.productId, quantity: it.quantity, price: it.price })) || [],
+          itemCount: o.items?.reduce((s, i) => s + (i.quantity || 0), 0) || 0,
+          total: o.amount || 0,
+          status: o.status,
+          orderDate: o.createdAt,
+          shippingAddress: o.shippingAddress?.address
+        }));
+      } catch (err) {
+        console.error('Load orders failed', err);
+        this.loadSampleData();
+      } finally {
+        this.isLoading = false;
+      }
     },
 
     loadSampleData() {
