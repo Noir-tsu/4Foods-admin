@@ -33,6 +33,11 @@ async function seed() {
   const order = await Order.create({ customerId: user._id, shopId: shop._id, items: [{ productId: prod._id, quantity: 1, price: prod.price }], amount: prod.price, status: 'pending', shippingAddress: { address: '123 Main St', city: 'Hanoi', country: 'VN', zipCode: '10000' }, paymentMethod: 'cash_on_delivery' });
 
   console.log('Seed finished');
+  // Create default settings
+  const Setting = require('../models/Setting');
+  await Setting.deleteMany({});
+  await Setting.create({ key: 'site_title', value: '4Foods Admin', description: 'Admin UI title' });
+  await Setting.create({ key: 'support_email', value: 'support@4foods.example', description: 'Support contact email' });
   process.exit(0);
 }
 

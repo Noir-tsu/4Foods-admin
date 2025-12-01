@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
@@ -33,6 +34,17 @@ app.use('/api/otps', require('./routes/otps'));
 app.use('/api/loyalty', require('./routes/loyalties'));
 app.use('/api/vouchers', require('./routes/vouchers'));
 app.use('/api/admin', require('./routes/admin'));
+// Serve Admin frontend static files (built admin SPA) from dist-modern
+const adminStaticPath = path.join(__dirname, 'dist-modern');
+app.use('/admin', express.static(adminStaticPath));
+// For SPA client-side routing – serve index.html
+app.get('/admin/*', (req, res) => {
+  res.sendFile(path.join(adminStaticPath, 'index.html'));
+});
+
+// Admin exports and settings
+app.use('/api/export', require('./routes/export'));
+app.use('/api/settings', require('./routes/settings'));
 
 // Health check
 app.get('/api/health', (req, res) => {

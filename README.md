@@ -263,3 +263,28 @@ copies or substantial portions of the Software.
 **⭐ Star this repository if you found it helpful!**
 
 *Built with ❤️ by the Colorlib team*
+
+## Serving admin frontend with backend
+
+If you'd like to serve the admin frontend from the backend server:
+
+1. Build the admin frontend:
+
+```bash
+npm run build
+```
+
+2. Copy `dist-modern` to `backend/dist-modern` (script provided):
+
+```bash
+node scripts/copyDistToBackend.js
+```
+
+3. Build and run the backend from the `backend` folder (Docker Compose uses `backend/docker-compose.yml`).
+
+```bash
+cd backend
+docker compose up -d --build
+```
+
+This will make the admin UI available at `http://localhost:5000/admin`.
