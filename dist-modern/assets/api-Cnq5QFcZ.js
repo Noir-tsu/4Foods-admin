@@ -1,0 +1,1 @@
+const o="http://localhost:5000";async function a(e){const t=await fetch(`${o}${e}`,{headers:{"Content-Type":"application/json"}});if(!t.ok)throw new Error(`Request failed ${t.status}`);return await t.json()}export{a as g};

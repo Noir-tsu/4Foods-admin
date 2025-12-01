@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   mongo:
     image: mongo:6
@@ -19,4 +17,4 @@ services:
 
 volumes:
   4foods-api_mongo-data:
-    external: true
+    # external: true

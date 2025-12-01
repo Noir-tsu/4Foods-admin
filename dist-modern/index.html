@@ -24,6 +24,9 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
     <!-- Title -->
     <title>Dashboard - Modern Bootstrap Admin</title>
     
@@ -32,7 +35,377 @@
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="./assets/manifest-CRl8oZJ-.json">
-  <script type="module" crossorigin src="./assets/main-f0Mg-34g.js"></script>
+    
+    <script>
+    // API base URL
+    const API_BASE = 'http://localhost:5000/api';
+
+    // Authentication token (you'll need to implement login)
+    let authToken = localStorage.getItem('authToken');
+
+    // Common headers for API requests
+    const getHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${authToken}`
+    });
+
+    // Dashboard data management
+    class DashboardManager {
+    constructor() {
+        this.isLoading = false;
+    }
+
+    async loadDashboardData() {
+        try {
+        this.showLoading();
+        
+        const [overview, activities, orders] = await Promise.all([
+            this.fetchOverview(),
+            this.fetchRecentActivity(),
+            this.fetchRecentOrders()
+        ]);
+        
+        this.updateOverviewCards(overview);
+        this.updateRecentActivity(activities);
+        this.updateRecentOrders(orders);
+        
+        this.hideLoading();
+        } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        this.showError('Failed to load dashboard data');
+        this.hideLoading();
+        }
+    }
+
+    async fetchOverview() {
+        const response = await fetch(`${API_BASE}/dashboard/overview`, {
+        headers: getHeaders()
+        });
+        if (!response.ok) throw new Error('Failed to fetch overview');
+        return response.json();
+    }
+
+    async fetchRecentActivity() {
+        const response = await fetch(`${API_BASE}/dashboard/recent-activity`, {
+        headers: getHeaders()
+        });
+        if (!response.ok) throw new Error('Failed to fetch recent activity');
+        return response.json();
+    }
+
+    async fetchRecentOrders() {
+        const response = await fetch(`${API_BASE}/dashboard/recent-orders`, {
+        headers: getHeaders()
+        });
+        if (!response.ok) throw new Error('Failed to fetch recent orders');
+        return response.json();
+    }
+
+    async refreshData() {
+        try {
+        // Show refreshing indicator
+        const refreshBtn = document.querySelector('[title="Refresh data"]');
+        const icon = refreshBtn.querySelector('i');
+        icon.classList.add('icon-spin');
+        
+        // Refresh dashboard data
+        const response = await fetch(`${API_BASE}/dashboard/refresh`, {
+            method: 'POST',
+            headers: getHeaders()
+        });
+        
+        if (!response.ok) throw new Error('Refresh failed');
+        
+        // Reload all data
+        await this.loadDashboardData();
+        
+        // Show success message
+        this.showToast('Data refreshed successfully', 'success');
+        
+        } catch (error) {
+        console.error('Error refreshing data:', error);
+        this.showToast('Failed to refresh data', 'error');
+        } finally {
+        const refreshBtn = document.querySelector('[title="Refresh data"]');
+        const icon = refreshBtn.querySelector('i');
+        icon.classList.remove('icon-spin');
+        }
+    }
+
+    updateOverviewCards(data) {
+        // Update revenue card
+        const revenueElement = document.querySelector('.stats-card:nth-child(1) h3');
+        const revenuePercentage = document.querySelector('.stats-card:nth-child(1) small');
+        revenueElement.textContent = `$${data.revenue.current.toLocaleString()}`;
+        revenuePercentage.innerHTML = this.formatPercentage(data.revenue.percentage);
+        
+        // Update other cards similarly...
+        // Orders
+        const ordersElement = document.querySelector('.stats-card:nth-child(2) h3');
+        const ordersPercentage = document.querySelector('.stats-card:nth-child(2) small');
+        ordersElement.textContent = data.orders.current.toLocaleString();
+        ordersPercentage.innerHTML = this.formatPercentage(data.orders.percentage);
+        
+        // Users
+        const usersElement = document.querySelector('.stats-card:nth-child(3) h3');
+        const usersPercentage = document.querySelector('.stats-card:nth-child(3) small');
+        usersElement.textContent = data.users.current.toLocaleString();
+        usersPercentage.innerHTML = this.formatPercentage(data.users.percentage);
+        
+        // Shops
+        const shopsElement = document.querySelector('.stats-card:nth-child(4) h3');
+        const shopsPercentage = document.querySelector('.stats-card:nth-child(4) small');
+        shopsElement.textContent = data.shops.current.toLocaleString();
+        shopsPercentage.innerHTML = this.formatPercentage(data.shops.percentage);
+        
+        // Shippers
+        const shippersElement = document.querySelector('.stats-card:nth-child(5) h3');
+        const shippersPercentage = document.querySelector('.stats-card:nth-child(5) small');
+        shippersElement.textContent = data.shippers.current.toLocaleString();
+        shippersPercentage.innerHTML = this.formatPercentage(data.shippers.percentage);
+    }
+
+    updateRecentActivity(activities) {
+        const activityFeed = document.querySelector('.activity-feed');
+        activityFeed.innerHTML = activities.map(activity => `
+        <div class="activity-item">
+            <div class="activity-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-${this.getActivityIcon(activity.type)}"></i>
+            </div>
+            <div class="activity-content">
+            <p class="mb-1">${activity.description}</p>
+            <small class="text-muted">${this.formatTime(activity.createdAt)}</small>
+            </div>
+        </div>
+        `).join('');
+    }
+
+    updateRecentOrders(orders) {
+        const ordersTable = document.querySelector('.table tbody');
+        ordersTable.innerHTML = orders.map(order => `
+        <tr>
+            <td>${order.orderId}</td>
+            <td>${order.customerId?.name || 'Unknown Customer'}</td>
+            <td>$${order.amount}</td>
+            <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+            <td>${this.formatDate(order.createdAt)}</td>
+        </tr>
+        `).join('');
+    }
+
+    formatPercentage(percentage) {
+        const isPositive = percentage >= 0;
+        const arrow = isPositive ? 'arrow-up' : 'arrow-down';
+        const colorClass = isPositive ? 'percentage-up' : 'percentage-down';
+        return `<i class="bi bi-${arrow}"></i> ${Math.abs(percentage)}% from last month`;
+    }
+
+    getActivityIcon(type) {
+        const icons = {
+        user: 'person-plus',
+        order: 'bag-check',
+        system: 'gear',
+        payment: 'currency-dollar',
+        delivery: 'truck'
+        };
+        return icons[type] || 'circle';
+    }
+
+    formatTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} minutes ago`;
+        if (diffHours < 24) return `${diffHours} hours ago`;
+        if (diffDays === 1) return 'Yesterday';
+        return `${diffDays} days ago`;
+    }
+
+    formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+        });
+    }
+
+    showLoading() {
+        document.getElementById('loading-screen').style.display = 'flex';
+    }
+
+    hideLoading() {
+        document.getElementById('loading-screen').style.display = 'none';
+    }
+
+    showError(message) {
+        this.showToast(message, 'error');
+    }
+
+    showToast(message, type = 'info') {
+        // Implement toast notification
+        console.log(`${type.toUpperCase()}: ${message}`);
+    }
+    }
+
+    // Initialize dashboard when page loads
+    document.addEventListener('DOMContentLoaded', async () => {
+    const dashboard = new DashboardManager();
+    window.dashboard = dashboard; // Make it globally accessible
+    
+    // Load initial data
+    await dashboard.loadDashboardData();
+    
+    // Set up refresh button
+    const refreshBtn = document.querySelector('[title="Refresh data"]');
+    refreshBtn.addEventListener('click', () => dashboard.refreshData());
+    
+    // Update "New Item" button to "Order Approval"
+    const newItemBtn = document.querySelector('.btn-primary');
+    newItemBtn.innerHTML = '<i class="bi bi-list-check me-2"></i>Order Approval';
+    newItemBtn.addEventListener('click', () => {
+        // Redirect to order approval page or open modal
+        window.location.href = '/order-approval.html';
+    });
+    });
+
+    // Add CSS for loading spinner
+    const style = document.createElement('style');
+    style.textContent = `
+    .icon-spin {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    `;
+    document.head.appendChild(style);
+    </script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+        }
+        
+        .stats-card {
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .activity-feed {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-right: 12px;
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .table td {
+            vertical-align: middle;
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-completed {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        
+        .status-pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+        
+        .status-processing {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+        
+        .status-cancelled {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .percentage-up {
+            color: #10b981;
+        }
+        
+        .percentage-down {
+            color: #ef4444;
+        }
+    </style>
+  <script type="module" crossorigin src="./assets/main-v8EDHglb.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/main-DLfE7m78.css">
 </head>
 
@@ -59,51 +432,27 @@
                         <h1 class="h4 mb-0 fw-bold text-primary">4Foods</h1>
                     </a>
 
-                    <!-- Search Bar with Alpine.js -->
-                    <div class="search-container flex-grow-1 mx-4" x-data="searchComponent">
+                    <!-- Search Bar -->
+                    <div class="search-container flex-grow-1 mx-4">
                         <div class="position-relative">
                             <input type="search" 
                                    class="form-control" 
                                    placeholder="Search... (Ctrl+K)"
-                                   x-model="query"
-                                   @input="search()"
-                                   data-search-input
                                    aria-label="Search">
                             <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3"></i>
-                            
-                            <!-- Search Results Dropdown -->
-                            <div x-show="results.length > 0" 
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="opacity-0 scale-95"
-                                 x-transition:enter-end="opacity-100 scale-100"
-                                 class="position-absolute top-100 start-0 w-100 bg-white border rounded-2 shadow-lg mt-1 z-3">
-                                <template x-for="result in results" :key="result.title">
-                                    <a :href="result.url" class="d-block px-3 py-2 text-decoration-none text-dark border-bottom">
-                                        <div class="d-flex align-items-center">
-                                            <i class="bi bi-file-text me-2 text-muted"></i>
-                                            <span x-text="result.title"></span>
-                                            <small class="ms-auto text-muted" x-text="result.type"></small>
-                                        </div>
-                                    </a>
-                                </template>
-                            </div>
                         </div>
                     </div>
 
                     <!-- Right Side Icons -->
                     <div class="navbar-nav flex-row">
-                        <!-- Theme Toggle with Alpine.js -->
-                        <div x-data="themeSwitch">
-                            <button class="btn btn-outline-secondary me-2" 
-                                    type="button" 
-                                    @click="toggle()"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="bottom"
-                                    title="Toggle theme">
-                                <i class="bi bi-sun-fill" x-show="currentTheme === 'light'"></i>
-                                <i class="bi bi-moon-fill" x-show="currentTheme === 'dark'"></i>
-                            </button>
-                        </div>
+                        <!-- Theme Toggle -->
+                        <button class="btn btn-outline-secondary me-2" 
+                                type="button" 
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="bottom"
+                                title="Toggle theme">
+                            <i class="bi bi-sun-fill"></i>
+                        </button>
 
                         <!-- Fullscreen Toggle -->
                         <button class="btn btn-outline-secondary me-2" 
@@ -205,66 +554,6 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#elementsSubmenu" aria-expanded="false">
-                                <i class="bi bi-puzzle"></i>
-                                <span>Elements</span>
-                                <span class="badge bg-primary rounded-pill me-2">New</span>
-                                <i class="bi bi-chevron-down ms-auto"></i>
-                            </a>
-                            <div class="collapse" id="elementsSubmenu">
-                                <ul class="nav nav-submenu">
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="./elements.html">
-                                            <i class="bi bi-grid"></i>
-                                            <span>Overview</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="./elements-buttons.html">
-                                            <i class="bi bi-square"></i>
-                                            <span>Buttons</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="./elements-alerts.html">
-                                            <i class="bi bi-exclamation-triangle"></i>
-                                            <span>Alerts</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="./elements-badges.html">
-                                            <i class="bi bi-award"></i>
-                                            <span>Badges</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="./elements-cards.html">
-                                            <i class="bi bi-card-text"></i>
-                                            <span>Cards</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="./elements-modals.html">
-                                            <i class="bi bi-window"></i>
-                                            <span>Modals</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="./elements-forms.html">
-                                            <i class="bi bi-ui-checks"></i>
-                                            <span>Forms</span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="./elements-tables.html">
-                                            <i class="bi bi-table"></i>
-                                            <span>Tables</span>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="./reports.html">
                                 <i class="bi bi-file-earmark-text"></i>
                                 <span>Reports</span>
@@ -281,12 +570,6 @@
                             <a class="nav-link" href="./calendar.html">
                                 <i class="bi bi-calendar-event"></i>
                                 <span>Calendar</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="./files.html">
-                                <i class="bi bi-folder2-open"></i>
-                                <span>Files</span>
                             </a>
                         </li>
                         <li class="nav-item mt-3">
@@ -342,35 +625,26 @@
                                 title="Refresh data">
                             <i class="bi bi-arrow-clockwise icon-hover"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-secondary" 
-                                data-bs-toggle="tooltip" 
-                                title="Export data">
-                            <i class="bi bi-download icon-hover"></i>
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary" 
-                                data-bs-toggle="tooltip" 
-                                title="Settings">
-                            <i class="bi bi-gear icon-hover"></i>
-                        </button>
                     </div>
                 </div>
 
-                <!-- Stats Cards with Alpine.js -->
+                <!-- Hàng 1: 5 khối thống kê -->
                 <div class="row g-4 mb-4">
-                    <div class="col-xl-3 col-lg-6" x-data="statsCounter(12426, 5)">
-                        <div class="card stats-card">
+                    <!-- This Month's Revenue -->
+                    <div class="col-xl">
+                        <div class="card stats-card h-100">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0">
                                         <div class="stats-icon bg-primary bg-opacity-10 text-primary">
-                                            <i class="bi bi-people"></i>
+                                            <i class="bi bi-currency-dollar"></i>
                                         </div>
                                     </div>
                                     <div class="flex-grow-1 ms-3">
-                                        <h6 class="mb-0 text-muted">Total Users</h6>
-                                        <h3 class="mb-0" x-text="value.toLocaleString()" data-stat-value>12,426</h3>
-                                        <small class="text-success">
-                                            <i class="bi bi-arrow-up"></i> +12.5%
+                                        <h6 class="mb-0 text-muted">This Month's Revenue</h6>
+                                        <h3 class="mb-0">$54,320</h3>
+                                        <small class="percentage-up">
+                                            <i class="bi bi-arrow-up"></i> +12.5% from last month
                                         </small>
                                     </div>
                                 </div>
@@ -378,41 +652,21 @@
                         </div>
                     </div>
 
-                    <div class="col-xl-3 col-lg-6">
-                        <div class="card stats-card">
+                    <!-- Orders in This Month -->
+                    <div class="col-xl">
+                        <div class="card stats-card h-100">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0">
                                         <div class="stats-icon bg-success bg-opacity-10 text-success">
-                                            <i class="bi bi-graph-up"></i>
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="mb-0 text-muted">Revenue</h6>
-                                        <h3 class="mb-0">$54,320</h3>
-                                        <small class="text-success">
-                                            <i class="bi bi-arrow-up"></i> +8.2%
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-3 col-lg-6">
-                        <div class="card stats-card">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="stats-icon bg-warning bg-opacity-10 text-warning">
                                             <i class="bi bi-bag-check"></i>
                                         </div>
                                     </div>
                                     <div class="flex-grow-1 ms-3">
-                                        <h6 class="mb-0 text-muted">Orders</h6>
+                                        <h6 class="mb-0 text-muted">Orders in This Month</h6>
                                         <h3 class="mb-0">1,852</h3>
-                                        <small class="text-danger">
-                                            <i class="bi bi-arrow-down"></i> -2.1%
+                                        <small class="percentage-down">
+                                            <i class="bi bi-arrow-down"></i> -2.1% from last month
                                         </small>
                                     </div>
                                 </div>
@@ -420,20 +674,65 @@
                         </div>
                     </div>
 
-                    <div class="col-xl-3 col-lg-6">
-                        <div class="card stats-card">
+                    <!-- New Users (This Month) -->
+                    <div class="col-xl">
+                        <div class="card stats-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="stats-icon bg-warning bg-opacity-10 text-warning">
+                                            <i class="bi bi-person-plus"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-0 text-muted">New Users (This Month)</h6>
+                                        <h3 class="mb-0">426</h3>
+                                        <small class="percentage-up">
+                                            <i class="bi bi-arrow-up"></i> +8.2% from last month
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Shops (This Month) -->
+                    <div class="col-xl">
+                        <div class="card stats-card h-100">
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0">
                                         <div class="stats-icon bg-info bg-opacity-10 text-info">
-                                            <i class="bi bi-clock-history"></i>
+                                            <i class="bi bi-shop"></i>
                                         </div>
                                     </div>
                                     <div class="flex-grow-1 ms-3">
-                                        <h6 class="mb-0 text-muted">Avg. Response</h6>
-                                        <h3 class="mb-0">2.3s</h3>
-                                        <small class="text-success">
-                                            <i class="bi bi-arrow-up"></i> +5.4%
+                                        <h6 class="mb-0 text-muted">Active Shops (This Month)</h6>
+                                        <h3 class="mb-0">284</h3>
+                                        <small class="percentage-up">
+                                            <i class="bi bi-arrow-up"></i> +5.4% from last month
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Shippers (This Month) -->
+                    <div class="col-xl">
+                        <div class="card stats-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0">
+                                        <div class="stats-icon bg-danger bg-opacity-10 text-danger">
+                                            <i class="bi bi-truck"></i>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-0 text-muted">Active Shippers (This Month)</h6>
+                                        <h3 class="mb-0">156</h3>
+                                        <small class="percentage-up">
+                                            <i class="bi bi-arrow-up"></i> +3.7% from last month
                                         </small>
                                     </div>
                                 </div>
@@ -442,27 +741,36 @@
                     </div>
                 </div>
 
-                <!-- Chart Section -->
+                <!-- Hàng 2: Biểu đồ Revenue Overview và Recent Activity -->
                 <div class="row g-4 mb-4">
+                    <!-- Biểu đồ Revenue Overview (70%) -->
                     <div class="col-lg-8">
-                        <div class="card">
+                        <div class="card h-100">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0">Revenue Overview</h5>
                                 <div class="btn-group btn-group-sm" role="group">
                                     <button type="button" class="btn btn-outline-primary active" data-chart-period="7d">7D</button>
-                                    <button type="button" class="btn btn-outline-primary" data-chart-period="30d">30D</button>
-                                    <button type="button" class="btn btn-outline-primary" data-chart-period="90d">90D</button>
+                                    <button type="button" class="btn btn-outline-primary" data-chart-period="1m">1M</button>
                                     <button type="button" class="btn btn-outline-primary" data-chart-period="1y">1Y</button>
                                 </div>
                             </div>
                             <div class="card-body">
-                                <canvas id="revenueChart" height="250"></canvas>
+                                <div class="chart-container">
+                                    <!-- Placeholder for revenue chart -->
+                                    <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                        <div class="text-center">
+                                            <i class="bi bi-bar-chart display-4 mb-3"></i>
+                                            <p>Revenue chart will be displayed here</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Recent Activity (30%) -->
                     <div class="col-lg-4">
-                        <div class="card">
+                        <div class="card h-100">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Recent Activity</h5>
                             </div>
@@ -495,42 +803,35 @@
                                             <small class="text-muted">1 hour ago</small>
                                         </div>
                                     </div>
+                                    <div class="activity-item">
+                                        <div class="activity-icon bg-info bg-opacity-10 text-info">
+                                            <i class="bi bi-currency-dollar"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <p class="mb-1">New payment received</p>
+                                            <small class="text-muted">2 hours ago</small>
+                                        </div>
+                                    </div>
+                                    <div class="activity-item">
+                                        <div class="activity-icon bg-danger bg-opacity-10 text-danger">
+                                            <i class="bi bi-truck"></i>
+                                        </div>
+                                        <div class="activity-content">
+                                            <p class="mb-1">Delivery status updated</p>
+                                            <small class="text-muted">3 hours ago</small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Additional Charts Row -->
+                <!-- Hàng 3: Recent Orders và Order Status Distribution -->
                 <div class="row g-4 mb-4">
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">User Growth (Last 7 Days)</h5>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="userGrowthChart" height="200"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Order Status Distribution</h5>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="orderStatusChart" height="200"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- New Widgets Row -->
-                <div class="row g-4 mb-4">
-                    <!-- Recent Orders -->
+                    <!-- Recent Orders (70%) -->
                     <div class="col-lg-8">
-                        <div class="card">
+                        <div class="card h-100">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Recent Orders</h5>
                             </div>
@@ -546,8 +847,56 @@
                                                 <th>Date</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="recent-orders-table">
-                                            <!-- Orders will be injected here by dashboard.js -->
+                                        <tbody>
+                                            <tr>
+                                                <td>#ORD-001</td>
+                                                <td>John Smith</td>
+                                                <td>$120.00</td>
+                                                <td><span class="status-badge status-completed">Completed</span></td>
+                                                <td>12 Nov 2023</td>
+                                            </tr>
+                                            <tr>
+                                                <td>#ORD-002</td>
+                                                <td>Jane Doe</td>
+                                                <td>$85.50</td>
+                                                <td><span class="status-badge status-processing">Processing</span></td>
+                                                <td>11 Nov 2023</td>
+                                            </tr>
+                                            <tr>
+                                                <td>#ORD-003</td>
+                                                <td>Robert Johnson</td>
+                                                <td>$210.75</td>
+                                                <td><span class="status-badge status-pending">Pending</span></td>
+                                                <td>10 Nov 2023</td>
+                                            </tr>
+                                            <tr>
+                                                <td>#ORD-004</td>
+                                                <td>Sarah Williams</td>
+                                                <td>$65.25</td>
+                                                <td><span class="status-badge status-completed">Completed</span></td>
+                                                <td>10 Nov 2023</td>
+                                            </tr>
+                                            <tr>
+                                                <td>#ORD-005</td>
+                                                <td>Michael Brown</td>
+                                                <td>$150.00</td>
+                                                <td><span class="status-badge status-cancelled">Cancelled</span></td>
+                                                <td>9 Nov 2023</td>
+                                            </tr>
+                                            <tr>
+                                                <td>#ORD-006</td>
+                                                <td>Emily Davis</td>
+                                                <td>$95.80</td>
+                                                <td><span class="status-badge status-processing">Processing</span></td>
+                                                <td>9 Nov 2023</td>
+                                            </tr>
+                                            <tr>
+                                                <td>#ORD-007</td>
+                                                <td>David Wilson</td>
+                                                <td>$175.40</td>
+                                                <td><span class="status-badge status-completed">Completed</span></td>
+                                                <td>8 Nov 2023</td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
@@ -555,33 +904,52 @@
                         </div>
                     </div>
 
-                    <!-- Storage Status -->
+                    <!-- Order Status Distribution (30%) -->
                     <div class="col-lg-4">
-                        <div class="card">
+                        <div class="card h-100">
                             <div class="card-header">
-                                <h5 class="card-title mb-0">Storage Status</h5>
+                                <h5 class="card-title mb-0">Order Status Distribution</h5>
                             </div>
                             <div class="card-body">
-                                <div id="storageStatusChart"></div>
+                                <div class="chart-container">
+                                    <!-- Placeholder for order status chart -->
+                                    <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                        <div class="text-center">
+                                            <i class="bi bi-pie-chart display-4 mb-3"></i>
+                                            <p>Order status distribution chart will be displayed here</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sales by Location -->
+                <!-- Hàng 4: Account Growth -->
                 <div class="row g-4">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Sales by Location</h5>
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title mb-0">Account Growth</h5>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-primary active" data-chart-period="7d">7D</button>
+                                    <button type="button" class="btn btn-outline-primary" data-chart-period="1m">1M</button>
+                                </div>
                             </div>
                             <div class="card-body">
-                                <div id="salesByLocationChart" style="min-height: 400px; width: 100%;"></div>
+                                <div class="chart-container">
+                                    <!-- Placeholder for account growth chart -->
+                                    <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                        <div class="text-center">
+                                            <i class="bi bi-bar-chart-line display-4 mb-3"></i>
+                                            <p>Account growth chart will be displayed here</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </main>
 
@@ -598,8 +966,7 @@
                 </div>
             </div>
         </footer>
-        </div> <!-- /.admin-wrapper -->
-    </div>
+    </div> <!-- /.admin-wrapper -->
 
     <!-- Toast Container -->
     <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 11">
