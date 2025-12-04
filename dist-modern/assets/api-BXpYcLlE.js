@@ -1,0 +1,1 @@
+const n="";async function a(e){const t=await fetch(`${n}${e}`,{headers:{"Content-Type":"application/json"}});if(!t.ok)throw new Error(`Request failed ${t.status}`);return await t.json()}export{a as g};
