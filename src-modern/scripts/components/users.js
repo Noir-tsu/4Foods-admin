@@ -1,8 +1,14 @@
 import Alpine from 'alpinejs';
 import { getJSON } from '../utils/api.js';
 
+// Thêm directive cho indeterminate state của checkbox
+Alpine.directive('indeterminate', (el, { expression }, { evaluate }) => {
+  const isIndeterminate = evaluate(expression);
+  el.indeterminate = isIndeterminate;
+});
+
 document.addEventListener('alpine:init', () => {
-  Alpine.data('userTable', () => ({
+    Alpine.data('userTable', () => ({
     users: [],
     filteredUsers: [],
     selectedUsers: [],
