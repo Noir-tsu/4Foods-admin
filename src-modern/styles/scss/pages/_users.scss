@@ -62,11 +62,11 @@
   }
 
   .user-select-checkbox {
-    appearance: checkbox;
+    // Sửa để checkbox thành ô vuông
     width: 16px;
     height: 16px;
     border: 2px solid var(--bs-border-color);
-    border-radius: 3px;
+    border-radius: 4px; // Để góc vuông hơn, có thể điều chỉnh
     background-color: var(--bs-body-bg);
     cursor: pointer;
     transition: all 0.2s ease-in-out;
@@ -94,12 +94,19 @@
     }
   }
 
+  // Chart container
   .chart-container {
     height: 250px;
     
     @include media-breakpoint-up(lg) {
       height: 300px;
     }
+  }
+
+  // Sửa cho biểu đồ không tràn
+  .card-body .apexcharts-canvas {
+    max-width: 100%;
+    overflow: hidden;
   }
 }
 
