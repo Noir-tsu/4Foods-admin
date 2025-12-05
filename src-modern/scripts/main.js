@@ -155,20 +155,11 @@ class AdminApp {
       case 'analytics':
         await this.initAnalyticsPage();
         break;
-      case 'forms':
-        await this.initFormsPage();
-        break;
       case 'products':
         await this.initProductsPage();
         break;
       case 'orders':
         await this.initOrdersPage();
-        break;
-      case 'reports':
-        await this.initReportsPage();
-        break;
-      case 'messages':
-        await this.initMessagesPage();
         break;
       case 'calendar':
         await this.initCalendarPage();
@@ -176,32 +167,9 @@ class AdminApp {
       case 'settings':
         await this.initSettingsPage();
         break;
-      case 'security':
-        await this.initSecurityPage();
-        break;
-      case 'files':
-        await this.initFilesPage();
-        break;
-      case 'help':
-        await this.initHelpPage();
-        break;
-      case 'elements':
-        await this.initElementsPage();
-        break;
       // Add more page-specific initializations here
       default:
         console.log('Page-specific components loading complete');
-    }
-  }
-
-  // Initialize forms page
-  async initFormsPage() {
-    try {
-      // Dynamically load the forms component script (it self-registers with Alpine)
-      await import('./components/forms.js');
-      console.log('📝 Forms page script loaded successfully');
-    } catch (error) {
-      console.warn('Forms components not available:', error);
     }
   }
 
@@ -241,24 +209,6 @@ class AdminApp {
     }
   }
 
-  async initReportsPage() {
-    try {
-      await import('./components/reports.js');
-      console.log('📊 Reports page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load reports page script:', error);
-    }
-  }
-
-  async initMessagesPage() {
-    try {
-      await import('./components/messages.js');
-      console.log('💬 Messages page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load messages page script:', error);
-    }
-  }
-
   async initCalendarPage() {
     try {
       await import('./components/calendar.js');
@@ -274,42 +224,6 @@ class AdminApp {
       console.log('⚙️ Settings page script loaded successfully');
     } catch (error) {
       console.error('Failed to load settings page script:', error);
-    }
-  }
-
-  async initSecurityPage() {
-    try {
-      await import('./components/security.js');
-      console.log('🔒 Security page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load security page script:', error);
-    }
-  }
-
-  async initFilesPage() {
-    try {
-      await import('./components/files.js');
-      console.log('📁 Files page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load files page script:', error);
-    }
-  }
-
-  async initHelpPage() {
-    try {
-      await import('./components/help.js');
-      console.log('❓ Help page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load help page script:', error);
-    }
-  }
-
-  async initElementsPage() {
-    try {
-      await import('./components/elements.js');
-      console.log('🧩 Elements page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load elements page script:', error);
     }
   }
 
