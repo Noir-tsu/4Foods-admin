@@ -1,0 +1,137 @@
+// Dashboard Styles
+.dashboard {
+  :root {
+    --primary: #6366f1;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #06b6d4;
+  }
+  
+  .stats-card {
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+  }
+  
+  .stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  
+  .activity-feed {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .activity-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+  
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-right: 12px;
+  }
+  
+  .activity-content {
+    flex: 1;
+  }
+  
+  .chart-container {
+    height: 300px;
+    position: relative;
+  }
+  
+  .table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+  
+  .table td {
+    vertical-align: middle;
+  }
+  
+  .status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+  
+  .status-completed {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+  }
+  
+  .status-pending {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+  }
+  
+  .status-processing {
+    background-color: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+  }
+  
+  .status-cancelled {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+  }
+  
+  .percentage-up {
+    color: #10b981;
+  }
+  
+  .percentage-down {
+    color: #ef4444;
+  }
+  
+  // Animation styles
+  .icon-spin {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  // Toast styles
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+  }
+}
