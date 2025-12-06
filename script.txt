@@ -135,3 +135,10 @@ project/
 └── assets/
     ├── images/
 
+_dashboard.scss: File SCSS chứa toàn bộ styles cho dashboard
+
+dashboard-manager.js: File JavaScript chứa toàn bộ logic của DashboardManager
+
+dashboard.css: File CSS đã biên dịch từ SCSS (có thể tạo bằng Sass compiler)
+
+index.html: File HTML chính, đã được làm sạch, chỉ chứa markup và link đến các file bên ngoài

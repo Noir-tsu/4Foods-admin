@@ -4,21 +4,27 @@
 
 // User management specific styles
 .user-management {
+  // Stats cards
   .stats-card {
     @include stats-card-hover();
+    border-radius: 12px;
+    overflow: hidden;
   }
 
   .stats-icon {
     @include stats-icon();
   }
 
+  // User avatars
   .user-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid var(--bs-border-color);
   }
 
+  // User status badges
   .user-status {
     @include status-badge();
     
@@ -41,11 +47,12 @@
     }
   }
 
+  // User role badges
   .user-role {
     @include role-badge();
   }
 
-  // Fix cho bulk actions bar - thay đổi cách hiển thị
+  // Bulk actions bar
   .bulk-actions-bar {
     background: var(--bs-primary-bg-subtle);
     border: 1px solid var(--bs-primary-border-subtle);
@@ -69,12 +76,12 @@
     }
   }
 
-  // Fix cho checkbox thành ô vuông
+  // Custom checkbox styling
   .user-select-checkbox {
     width: 18px;
     height: 18px;
     border: 2px solid var(--bs-border-color);
-    border-radius: 4px; // Đặt border-radius nhỏ để thành ô vuông
+    border-radius: 4px;
     background-color: var(--bs-body-bg);
     cursor: pointer;
     transition: all 0.2s ease-in-out;
@@ -82,6 +89,7 @@
     appearance: none;
     -webkit-appearance: none;
     margin: 0;
+    vertical-align: middle;
 
     &:checked {
       background-color: var(--bs-primary);
@@ -105,7 +113,7 @@
       border-color: var(--bs-primary);
     }
 
-    // Style cho indeterminate state
+    // Indeterminate state
     &:indeterminate {
       background-color: var(--bs-primary);
       border-color: var(--bs-primary);
@@ -124,12 +132,12 @@
     }
   }
 
-  // Style cho hàng được chọn
-  .selected {
+  // Selected row styling
+  .table tbody tr.selected {
     background-color: var(--bs-primary-bg-subtle) !important;
   }
 
-  // Fix cho chart container
+  // Chart containers
   .chart-container {
     height: 250px;
     
@@ -138,31 +146,183 @@
     }
   }
 
-  // Fix cho biểu đồ không tràn
+  // ApexCharts fixes
   .apexcharts-canvas {
     max-width: 100% !important;
     overflow: hidden !important;
   }
-}
 
-// Style cho sortable columns
-.sortable {
-  cursor: pointer;
-  user-select: none;
-  
-  &:hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.05);
+  // Sortable columns
+  .sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    
+    &:hover {
+      background-color: rgba(var(--bs-primary-rgb), 0.05);
+    }
   }
-}
 
-// Style cho activity feed
-.activity-feed {
-  .activity-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+  .sort-icon {
+    font-size: 0.875rem;
+    margin-left: 0.25rem;
+  }
+
+  // Activity feed
+  .activity-feed {
+    max-height: 400px;
+    overflow-y: auto;
+    
+    .activity-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--bs-border-color);
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+
+  // Pagination
+  .pagination {
+    margin-bottom: 0;
+  }
+
+  .page-link {
+    border: none;
+    color: var(--bs-secondary);
+    padding: 0.375rem 0.75rem;
+
+    &:hover {
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+      color: var(--bs-primary);
+    }
+  }
+
+  .page-item.active .page-link {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+  }
+
+  .page-item.disabled .page-link {
+    color: var(--bs-secondary);
+    opacity: 0.5;
+  }
+
+  // Loading spinner
+  .loading-spinner {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 2rem;
   }
+
+  // Toast styles
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+  }
+
+  // Responsive adjustments
+  @include media-breakpoint-down(md) {
+    .bulk-actions-bar {
+      padding: 0.75rem;
+      
+      .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+      }
+    }
+    
+    .card-header .col-auto {
+      width: 100%;
+      margin-top: 1rem;
+    }
+    
+    .card-header .d-flex {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .card-header .position-relative,
+    .card-header .form-select-sm {
+      width: 100% !important;
+    }
+  }
+
+  // Dark mode adjustments
+  [data-bs-theme="dark"] & {
+    .stats-card {
+      background: var(--bs-dark-bg-subtle);
+      border-color: var(--bs-dark-border-color);
+    }
+
+    .table th {
+      background-color: var(--bs-dark-bg-subtle);
+      color: var(--bs-dark-text);
+    }
+
+    .table-hover tbody tr:hover {
+      background-color: var(--bs-dark-bg-subtle);
+    }
+
+    .bulk-actions-bar {
+      background: rgba(var(--bs-primary-rgb), 0.15);
+      border-color: rgba(var(--bs-primary-rgb), 0.3);
+    }
+  }
+}
+
+// Mixins for reusable styles
+@mixin stats-card-hover() {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--bs-border-color);
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@mixin stats-icon() {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+@mixin status-badge() {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@mixin role-badge() {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
