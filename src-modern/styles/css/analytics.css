@@ -1,0 +1,124 @@
+.analytics-page {
+  --primary: #6366f1;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #06b6d4;
+}
+
+.analytics-page .stats-card {
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.analytics-page .stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.analytics-page .chart-container {
+  height: 300px;
+  position: relative;
+}
+
+.analytics-page .table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.analytics-page .table th {
+  border-top: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.analytics-page .table td {
+  vertical-align: middle;
+}
+
+.analytics-page .status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.analytics-page .vietnamese-content {
+  font-family: 'Inter', sans-serif;
+}
+
+.analytics-page .vietnamese-content h1,
+.analytics-page .vietnamese-content h2,
+.analytics-page .vietnamese-content h3,
+.analytics-page .vietnamese-content h4,
+.analytics-page .vietnamese-content h5,
+.analytics-page .vietnamese-content h6 {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.analytics-page .vietnamese-content .text-muted {
+  color: #6b7280 !important;
+}
+
+.analytics-page .revenue-summary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+.analytics-page .revenue-summary .card-title {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.analytics-page .payment-method-card {
+  transition: all 0.3s ease;
+}
+
+.analytics-page .payment-method-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.analytics-page .payment-method-card .card-header {
+  font-weight: 600;
+  background: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.analytics-page .category-item {
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 1rem 0;
+}
+
+.analytics-page .category-item:last-child {
+  border-bottom: none;
+}
+
+.analytics-page .category-item .category-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.analytics-page .scroll-indicator {
+  color: #9ca3af;
+  font-size: 0.75rem;
+}
+
+.analytics-page .progress-custom {
+  height: 10px;
+  border-radius: 5px;
+}
+
+.analytics-page .progress-custom .progress-bar {
+  border-radius: 5px;
+}

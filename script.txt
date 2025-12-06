@@ -123,33 +123,15 @@ Tệp đã được build tối ưu:
 --------------------
 Cấu trúc backend hoàn chỉnh
 
-backend/
-├── package.json
-├── server.js
-├── routes/
-│   ├── auth.js
-│   ├── users.js
-│   ├── products.js
-│   ├── orders.js
-│   ├── dashboard.js
-│   └── stats.js
-├── controllers/
-│   ├── authController.js
-│   ├── usersController.js
-│   ├── productsController.js
-│   ├── ordersController.js
-│   ├── dashboardController.js
-│   └── statsController.js
-├── models/
-│   ├── User.js
-│   ├── Product.js
-│   ├── Order.js
-│   └── Activity.js
-├── middleware/
-│   ├── auth.js
-│   └── validation.js
-├── config/
-│   ├── database.js
-│   └── cors.js
-└── data/
-    └── seedData.js
+project/
+├── index.html
+├── css/
+│   └── dashboard.css
+├── scss/
+│   └── _dashboard.scss
+├── scripts/
+│   ├── dashboard-manager.js
+│   └── main.js
+└── assets/
+    ├── images/
+
