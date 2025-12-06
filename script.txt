@@ -19,20 +19,7 @@ users.html	Quản lý người dùng, CRUD, danh sách
 products.html	Quản lý sản phẩm, danh sách, tìm kiếm
 orders.html	Quản lý đơn hàng, trạng thái, theo dõi
 calendar.html	Lịch sự kiện, quản lý lịch
-messages.html	Giao diện chat, tin nhắn
-reports.html	Báo cáo, bảng dữ liệu, xuất file
-files.html	Quản lý file, trình duyệt tệp
-elements.html	Thư viện component UI
-elements-alerts.html	Component cảnh báo
-elements-badges.html	Nhãn, badges
-elements-buttons.html	Các loại nút bấm
-elements-cards.html	Thẻ (card) component
-elements-forms.html	Form input components
-elements-modals.html	Cửa sổ modal
-elements-tables.html	Bảng dữ liệu
 settings.html	Cài đặt hệ thống
-security.html	Bảo mật, quyền hạn
-help.html	Trợ giúp, FAQ
 
 
 B. Scripts (JavaScript/ES6+ Modules)
