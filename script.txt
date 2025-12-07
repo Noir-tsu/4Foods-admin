@@ -142,3 +142,36 @@ dashboard-manager.js: File JavaScript chứa toàn bộ logic của DashboardMan
 dashboard.css: File CSS đã biên dịch từ SCSS (có thể tạo bằng Sass compiler)
 
 index.html: File HTML chính, đã được làm sạch, chỉ chứa markup và link đến các file bên ngoài
+
+├── frontend/ (webadmin)
+│ ├── src-modern/
+│ │ │── index.html
+│ │ │── products.html
+│ │ │── orders.html
+│ │ │── users.html
+│ │ │── analytics.html
+│ │ │── settings.html
+│ │ ├── scripts/
+│ │ │ ├── managers/ ← Class-based cho API logic
+│ │ │ │ ├── DashboardManager.js
+│ │ │ │ ├── ProductsManager.js
+│ │ │ │ ├── OrdersManager.js
+│ │ │ │ ├── UsersManager.js
+│ │ │ ├── components/ ← Alpine.js cho UI components
+│ │ │ │ ├── dashboard.js
+│ │ │ │ ├── products.js
+│ │ │ │ ├── orders.js
+│ │ │ │ └── ...
+│ │ │ ├── utils/
+│ │ │ │ ├── api.js ← API utilities (đã có)
+│ │ │ │ ├── icon-manager.js ← Format price, date, v.v.
+│ │ │ │ ├── theme-manager.js ← Form validation
+│ │ │ │ └── notifications.js ← Toast, alerts
+│ │ │ └── main.js ← Main app initialization
+│ │ └── styles/
+│ │ ├── scss/
+│ │ │ ├── _dashboard.scss
+│ │ │ ├── _products.scss
+│ │ │ └── ...
+│ │ └── css/
+        ...

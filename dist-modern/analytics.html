@@ -20,16 +20,19 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- ApexCharts CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
-    <!-- Custom Styles for Analytics Dashboard -->
-  <script type="module" crossorigin src="./assets/main-CmdYv8dX.js"></script>
-  <script type="module" crossorigin src="./assets/analytics-DrAyciLB.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/main-CO0PwaU4.css">
+    <!-- ApexCharts CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.css">
+    
+    <!-- Analytics CSS -->
+    <link rel="stylesheet" href="/css/analytics.css">
+  <script type="module" crossorigin src="./assets/main-CWVm6W1x.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/main-DyLKuzVJ.css">
 </head>
 
-<body data-page="analytics" class="analytics-page">
+<body data-page="analytics" class="analytics-page vietnamese-content">
     <!-- Admin App Container -->
     <div class="admin-app">
         <div class="admin-wrapper" id="admin-wrapper">
@@ -44,51 +47,27 @@
                             <h1 class="h4 mb-0 fw-bold text-primary">4Foods</h1>
                         </a>
 
-                        <!-- Search Bar with Alpine.js -->
-                        <div class="search-container flex-grow-1 mx-4" x-data="searchComponent">
+                        <!-- Search Bar -->
+                        <div class="search-container flex-grow-1 mx-4">
                             <div class="position-relative">
                                 <input type="search" 
                                        class="form-control" 
                                        placeholder="Search... (Ctrl+K)"
-                                       x-model="query"
-                                       @input="search()"
-                                       data-search-input
                                        aria-label="Search">
                                 <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3"></i>
-                                
-                                <!-- Search Results Dropdown -->
-                                <div x-show="results.length > 0" 
-                                     x-transition:enter="transition ease-out duration-100"
-                                     x-transition:enter-start="opacity-0 scale-95"
-                                     x-transition:enter-end="opacity-100 scale-100"
-                                     class="position-absolute top-100 start-0 w-100 bg-white border rounded-2 shadow-lg mt-1 z-3">
-                                    <template x-for="result in results" :key="result.title">
-                                        <a :href="result.url" class="d-block px-3 py-2 text-decoration-none text-dark border-bottom">
-                                            <div class="d-flex align-items-center">
-                                                <i class="bi bi-file-text me-2 text-muted"></i>
-                                                <span x-text="result.title"></span>
-                                                <small class="ms-auto text-muted" x-text="result.type"></small>
-                                            </div>
-                                        </a>
-                                    </template>
-                                </div>
                             </div>
                         </div>
 
                         <!-- Right Side Icons -->
                         <div class="navbar-nav flex-row">
-                            <!-- Theme Toggle with Alpine.js -->
-                            <div x-data="themeSwitch">
-                                <button class="btn btn-outline-secondary me-2" 
-                                        type="button" 
-                                        @click="toggle()"
-                                        data-bs-toggle="tooltip"
-                                        data-bs-placement="bottom"
-                                        title="Toggle theme">
-                                    <i class="bi bi-sun-fill" x-show="currentTheme === 'light'"></i>
-                                    <i class="bi bi-moon-fill" x-show="currentTheme === 'dark'"></i>
-                                </button>
-                            </div>
+                            <!-- Theme Toggle -->
+                            <button class="btn btn-outline-secondary me-2" 
+                                    type="button" 
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="bottom"
+                                    title="Toggle theme">
+                                <i class="bi bi-sun-fill"></i>
+                            </button>
 
                             <!-- Fullscreen Toggle -->
                             <button class="btn btn-outline-secondary me-2" 
@@ -232,7 +211,7 @@
                                 <input type="radio" class="btn-check" name="dateRange" id="quarter" autocomplete="off">
                                 <label class="btn btn-outline-secondary btn-sm" for="quarter">90D</label>
                             </div>
-                            <button type="button" class="btn btn-primary btn-sm" @click="exportData()">
+                            <button type="button" class="btn btn-primary btn-sm" id="exportReportBtn">
                                 <i class="bi bi-download me-2"></i>Export Report
                             </button>
                         </div>
@@ -244,13 +223,13 @@
                         <!-- Khối 1: Tổng doanh thu -->
                         <div class="row g-4 mb-4">
                             <div class="col-12">
-                                <div class="card">
+                                <div class="card revenue-summary">
                                     <div class="card-header">
                                         <h5 class="card-title mb-0">TỔNG DOANH THU</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="d-flex align-items-center">
-                                            <div class="display-4 fw-bold text-primary">$124,592.00</div>
+                                            <div class="display-4 fw-bold">$124,592.00</div>
                                             <div class="ms-3">
                                                 <div class="text-success small">
                                                     <i class="bi bi-arrow-up"></i> 2.5% so với tháng trước
@@ -402,7 +381,7 @@
                                             </table>
                                         </div>
                                         <div class="card-footer text-center">
-                                            <small class="text-muted">Cuộn xuống để xem thêm đơn hàng</small>
+                                            <small class="text-muted scroll-indicator">Cuộn xuống để xem thêm đơn hàng</small>
                                         </div>
                                     </div>
                                 </div>
@@ -412,7 +391,7 @@
                         <!-- Khối 4: Phương thức thanh toán -->
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
-                                <div class="card h-100">
+                                <div class="card h-100 payment-method-card">
                                     <div class="card-header">
                                         <h5 class="card-title mb-0">THANH TOÁN TIỀN MẶT</h5>
                                     </div>
@@ -427,7 +406,7 @@
                                             </div>
                                         </div>
                                         <div class="mt-3">
-                                            <div class="progress" style="height: 10px;">
+                                            <div class="progress progress-custom">
                                                 <div class="progress-bar bg-success" style="width: 36.5%"></div>
                                             </div>
                                         </div>
@@ -435,7 +414,7 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="card h-100">
+                                <div class="card h-100 payment-method-card">
                                     <div class="card-header">
                                         <h5 class="card-title mb-0">THANH TOÁN CHUYỂN KHOẢN (Momo/Zalopay)</h5>
                                     </div>
@@ -450,7 +429,7 @@
                                             </div>
                                         </div>
                                         <div class="mt-3">
-                                            <div class="progress" style="height: 10px;">
+                                            <div class="progress progress-custom">
                                                 <div class="progress-bar bg-primary" style="width: 63.5%"></div>
                                             </div>
                                         </div>
@@ -468,7 +447,7 @@
                                     </div>
                                     <div class="card-body p-0">
                                         <div class="list-group list-group-flush">
-                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div class="list-group-item d-flex justify-content-between align-items-center category-item">
                                                 <div class="d-flex align-items-center">
                                                     <div class="me-3 bg-primary bg-opacity-10 p-2 rounded">
                                                         <i class="bi bi-cup-straw text-primary"></i>
@@ -483,7 +462,7 @@
                                                     <small class="text-success">36.3% tổng doanh thu</small>
                                                 </div>
                                             </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div class="list-group-item d-flex justify-content-between align-items-center category-item">
                                                 <div class="d-flex align-items-center">
                                                     <div class="me-3 bg-success bg-opacity-10 p-2 rounded">
                                                         <i class="bi bi-egg-fried text-success"></i>
@@ -498,7 +477,7 @@
                                                     <small class="text-success">31.1% tổng doanh thu</small>
                                                 </div>
                                             </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div class="list-group-item d-flex justify-content-between align-items-center category-item">
                                                 <div class="d-flex align-items-center">
                                                     <div class="me-3 bg-warning bg-opacity-10 p-2 rounded">
                                                         <i class="bi bi-cake2 text-warning"></i>
@@ -513,7 +492,7 @@
                                                     <small class="text-success">19.7% tổng doanh thu</small>
                                                 </div>
                                             </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div class="list-group-item d-flex justify-content-between align-items-center category-item">
                                                 <div class="d-flex align-items-center">
                                                     <div class="me-3 bg-info bg-opacity-10 p-2 rounded">
                                                         <i class="bi bi-basket text-info"></i>
@@ -537,7 +516,7 @@
                         <!-- Dãy cuối: Tổng kết doanh thu hôm nay -->
                         <div class="row">
                             <div class="col-12">
-                                <div class="card bg-primary text-white">
+                                <div class="card revenue-summary">
                                     <div class="card-body text-center py-4">
                                         <h4 class="card-title mb-3">TỔNG KẾT DOANH THU HÔM NAY</h4>
                                         <div class="display-3 fw-bold mb-3">$3,245.50</div>
@@ -582,12 +561,32 @@
         </div> <!-- /.admin-wrapper -->
     </div>
 
-    <!-- Page-specific Component -->
+    <!-- Toast Container -->
+    <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+        <div id="toast-container"></div>
+    </div>
 
+    <!-- Scripts -->
+    <!-- Alpine.js -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.0/dist/cdn.min.js" defer></script>
+    
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0"></script>
+    
+    <!-- Analytics Manager -->
+    <script src="/scripts/analytics-manager.js"></script>
+    
     <!-- Main App Script -->
 
     <script>
+      // Initialize analytics page
       document.addEventListener('DOMContentLoaded', () => {
+        // Initialize analytics
+        if (typeof initializeAnalytics === 'function') {
+          initializeAnalytics();
+        }
+        
+        // Sidebar toggle functionality
         const toggleButton = document.querySelector('[data-sidebar-toggle]');
         const wrapper = document.getElementById('admin-wrapper');
 
@@ -614,7 +613,17 @@
             }
           });
         }
+        
+        // Date range filter functionality
+        const dateRangeInputs = document.querySelectorAll('input[name="dateRange"]');
+        dateRangeInputs.forEach(input => {
+          input.addEventListener('change', function() {
+            const selectedValue = this.id;
+            console.log('Date range changed to:', selectedValue);
+            // You can add date range filtering logic here
+          });
+        });
       });
     </script>
 </body>
-</html> 
+</html>
