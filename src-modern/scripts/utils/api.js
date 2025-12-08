@@ -1,6 +1,5 @@
 // src/utils/api.js
-
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+const API_BASE = 'http://157.66.101.113:5000'; // ← IP VPS của bạn + port 5000
 
 // Hàm lấy token từ localStorage (sau khi login bạn phải lưu vào đây)
 const getToken = () => localStorage.getItem('token');

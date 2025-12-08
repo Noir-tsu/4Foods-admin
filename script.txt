@@ -175,3 +175,67 @@ index.html: File HTML chính, đã được làm sạch, chỉ chứa markup và
 │ │ │ └── ...
 │ │ └── css/
         ...
+
+
+project/
+│
+├── CHANGELOG.md
+├── LICENSE.md
+├── package.json
+├── README.md
+├── RELEASE_NOTES_v3.0.0.md
+├── RELEASE_NOTES_v3.1.0.md
+├── script.txt
+├── vite.config.js
+│
+├── dist-modern/               <-- folder build ra
+│   ├── analytics.html
+│   ├── calendar.html
+│   ├── index.html
+│   ├── orders.html
+│   ├── products.html
+│   ├── settings.html
+│   ├── users.html
+│   ├── assets/
+│   │   ├── main-CWVm6W1x.js
+│   │   ├── main-DyLKuzVJ.css   <-- CSS bị không load **chính là file này**
+│   │   ├── analytics-DJz-gylA.js
+│   │   ├── ...
+│   │   ├── bootstrap-icons-xxx.woff
+│   │   ├── ...
+│   │
+│   └── manifest-CRl8oZJ-.json
+│
+└── src-modern/
+    ├── analytics.html
+    ├── calendar.html
+    ├── index.html
+    ├── manifest.json
+    ├── orders.html
+    ├── products.html
+    ├── settings.html
+    ├── users.html
+    │
+    ├── assets/
+    │   ├── icons/
+    │   └── images/
+    │
+    ├── scripts/
+    │   ├── main.js            <-- file JS chạy chính
+    │   ├── components/
+    │   ├── managers/
+    │   ├── utils/
+    │
+    └── styles/
+        ├── css/
+        │   ├── analytics.css
+        │   ├── dashboard.css
+        │   ├── users.css
+        │
+        └── scss/
+            ├── main.scss      <-- file SCSS gốc cần được Vite build
+            ├── abstracts/
+            ├── components/
+            ├── layout/
+            ├── pages/
+            └── themes/

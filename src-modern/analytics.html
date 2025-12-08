@@ -3,90 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Dashboard - Modern Bootstrap Admin</title>
-    
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Comprehensive analytics dashboard with advanced charts, KPIs, and data visualizations">
-    <meta name="keywords" content="bootstrap, admin, dashboard, analytics, charts, data visualization">
-    
-    <!-- Favicon -->
+    <title>Analytics Dashboard</title>
+
+    <!-- Favicon & PWA -->
     <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg">
     <link rel="icon" type="image/png" href="/assets/icons/favicon.png">
-    
-    <!-- PWA Manifest -->
     <link rel="manifest" href="/manifest.json">
-    
-    <!-- Preload critical fonts -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
-    <!-- ApexCharts CSS -->
+
+    <!-- Icons & Charts -->
+    <link rel="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0/dist/apexcharts.css">
-    
-    <!-- Analytics CSS -->
+
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/analytics.css">
 </head>
 
 <body data-page="analytics" class="analytics-page vietnamese-content">
-    <!-- Admin App Container -->
     <div class="admin-app">
         <div class="admin-wrapper" id="admin-wrapper">
-            
-            <!-- Header -->
+            <!-- Header (giữ nguyên) -->
             <header class="admin-header">
                 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
                     <div class="container-fluid">
-                        <!-- Logo/Brand -->
                         <a class="navbar-brand d-flex align-items-center" href="./index.html">
-                            <img src="/assets/images/logo.svg" alt="Logo" height="32" class="d-inline-block align-text-top me-2">
+                            <img src="/assets/images/logo.svg" alt="Logo" height="32" class="me-2">
                             <h1 class="h4 mb-0 fw-bold text-primary">4Foods</h1>
                         </a>
-
-                        <!-- Search Bar -->
                         <div class="search-container flex-grow-1 mx-4">
                             <div class="position-relative">
-                                <input type="search" 
-                                       class="form-control" 
-                                       placeholder="Search... (Ctrl+K)"
-                                       aria-label="Search">
+                                <input type="search" class="form-control" placeholder="Search... (Ctrl+K)">
                                 <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-3"></i>
                             </div>
                         </div>
-
-                        <!-- Right Side Icons -->
                         <div class="navbar-nav flex-row">
-                            <!-- Theme Toggle -->
-                            <button class="btn btn-outline-secondary me-2" 
-                                    type="button" 
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="bottom"
-                                    title="Toggle theme">
-                                <i class="bi bi-sun-fill"></i>
-                            </button>
-
-                            <!-- Fullscreen Toggle -->
-                            <button class="btn btn-outline-secondary me-2" 
-                                    type="button" 
-                                    data-fullscreen-toggle
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="bottom"
-                                    title="Toggle fullscreen">
-                                <i class="bi bi-arrows-fullscreen icon-hover"></i>
-                            </button>
-
-                            <!-- Notifications -->
+                            <button class="btn btn-outline-secondary me-2" type="button" title="Toggle theme"><i class="bi bi-sun-fill"></i></button>
+                            <button class="btn btn-outline-secondary me-2" type="button" data-fullscreen-toggle title="Toggle fullscreen"><i class="bi bi-arrows-fullscreen"></i></button>
                             <div class="dropdown me-2">
-                                <button class="btn btn-outline-secondary position-relative" 
-                                        type="button" 
-                                        data-bs-toggle="dropdown" 
-                                        aria-expanded="false">
+                                <button class="btn btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown">
                                     <i class="bi bi-bell"></i>
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        3
-                                    </span>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li><h6 class="dropdown-header">Notifications</h6></li>
@@ -97,18 +55,9 @@
                                     <li><a class="dropdown-item text-center" href="#">View all notifications</a></li>
                                 </ul>
                             </div>
-
-                            <!-- User Menu -->
                             <div class="dropdown">
-                                <button class="btn btn-outline-secondary d-flex align-items-center" 
-                                        type="button" 
-                                        data-bs-toggle="dropdown" 
-                                        aria-expanded="false">
-                                    <img src="/assets/images/avatar-placeholder.svg" 
-                                         alt="User Avatar" 
-                                         width="24" 
-                                         height="24" 
-                                         class="rounded-circle me-2">
+                                <button class="btn btn-outline-secondary d-flex align-items-center" type="button" data-bs-toggle="dropdown">
+                                    <img src="/assets/images/avatar-placeholder.svg" width="24" height="24" class="rounded-circle me-2">
                                     <span class="d-none d-md-inline">John Doe</span>
                                     <i class="bi bi-chevron-down ms-1"></i>
                                 </button>
@@ -124,172 +73,87 @@
                 </nav>
             </header>
 
-            <!-- Sidebar -->
+            <!-- Sidebar (giữ nguyên) -->
             <aside class="admin-sidebar" id="admin-sidebar">
                 <div class="sidebar-content">
                     <nav class="sidebar-nav">
                         <ul class="nav flex-column">
-                            <li class="nav-item">
-                                <a class="nav-link" href="./index.html">
-                                    <i class="bi bi-speedometer2"></i>
-                                    <span>Dashboard</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link active" href="./analytics.html">
-                                    <i class="bi bi-graph-up"></i>
-                                    <span>Analytics</span>
-                                    <span class="badge bg-primary rounded-pill ms-auto">Active</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="./users.html">
-                                    <i class="bi bi-people"></i>
-                                    <span>Users</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="./products.html">
-                                    <i class="bi bi-box"></i>
-                                    <span>Products</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="./orders.html">
-                                    <i class="bi bi-bag-check"></i>
-                                    <span>Orders</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="./calendar.html">
-                                    <i class="bi bi-calendar-event"></i>
-                                    <span>Calendar</span>
-                                </a>
-                            </li>
-                            <li class="nav-item mt-3">
-                                <small class="text-muted px-3 text-uppercase fw-bold">Admin</small>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="./settings.html">
-                                    <i class="bi bi-gear"></i>
-                                    <span>Settings</span>
-                                </a>
-                            </li>
+                            <li class="nav-item"><a class="nav-link" href="./index.html"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                            <li class="nav-item"><a class="nav-link active" href="./analytics.html"><i class="bi bi-graph-up"></i> Analytics <span class="badge bg-primary rounded-pill ms-auto">Active</span></a></li>
+                            <li class="nav-item"><a class="nav-link" href="./users.html"><i class="bi bi-people"></i> Users</a></li>
+                            <li class="nav-item"><a class="nav-link" href="./products.html"><i class="bi bi-box"></i> Products</a></li>
+                            <li class="nav-item"><a class="nav-link" href="./orders.html"><i class="bi bi-bag-check"></i> Orders</a></li>
+                            <li class="nav-item"><a class="nav-link" href="./calendar.html"><i class="bi bi-calendar-event"></i> Calendar</a></li>
+                            <li class="nav-item mt-3"><small class="text-muted px-3 text-uppercase fw-bold">Admin</small></li>
+                            <li class="nav-item"><a class="nav-link" href="./settings.html"><i class="bi bi-gear"></i> Settings</a></li>
                         </ul>
                     </nav>
                 </div>
             </aside>
 
-            <!-- Floating Hamburger Menu -->
-            <button class="hamburger-menu" 
-                    type="button" 
-                    data-sidebar-toggle
-                    aria-label="Toggle sidebar">
-                <i class="bi bi-list"></i>
-            </button>
+            <button class="hamburger-menu" type="button" data-sidebar-toggle><i class="bi bi-list"></i></button>
 
             <!-- Main Content -->
             <main class="admin-main">
                 <div class="container-fluid p-4 p-lg-5">
-                    
-                    <!-- Page Header -->
                     <div class="d-flex justify-content-between align-items-center mb-4 mb-lg-5">
                         <div>
                             <h1 class="h3 mb-0">Analytics Dashboard</h1>
                             <p class="text-muted mb-0">Comprehensive insights and performance metrics</p>
                         </div>
                         <div class="d-flex gap-2">
-                            <div class="btn-group" role="group">
-                                <input type="radio" class="btn-check" name="dateRange" id="today" autocomplete="off" checked>
-                                <label class="btn btn-outline-secondary btn-sm" for="today">Today</label>
-                                <input type="radio" class="btn-check" name="dateRange" id="week" autocomplete="off">
-                                <label class="btn btn-outline-secondary btn-sm" for="week">7D</label>
-                                <input type="radio" class="btn-check" name="dateRange" id="month" autocomplete="off">
-                                <label class="btn btn-outline-secondary btn-sm" for="month">30D</label>
-                                <input type="radio" class="btn-check" name="dateRange" id="quarter" autocomplete="off">
-                                <label class="btn btn-outline-secondary btn-sm" for="quarter">90D</label>
-                            </div>
-                            <button type="button" class="btn btn-primary btn-sm" id="exportReportBtn">
+                            <button type="button" class="btn btn-primary btn-sm">
                                 <i class="bi bi-download me-2"></i>Export Report
                             </button>
                         </div>
                     </div>
 
-                    <!-- Analytics Dashboard Container -->
+                    <!-- TOÀN BỘ NỘI DUNG ĐƯỢC ĐỔ BẰNG ALPINE -->
                     <div x-data="analyticsComponent" x-init="init()">
-                        
-                        <!-- Khối 1: Tổng doanh thu -->
+                        <!-- 1. Tổng doanh thu -->
                         <div class="row g-4 mb-4">
                             <div class="col-12">
                                 <div class="card revenue-summary">
-                                    <div class="card-header">
-                                        <h5 class="card-title mb-0">TỔNG DOANH THU</h5>
-                                    </div>
+                                    <div class="card-header"><h5 class="card-title mb-0">TỔNG DOANH THU</h5></div>
                                     <div class="card-body">
                                         <div class="d-flex align-items-center">
-                                            <div class="display-4 fw-bold">$124,592.00</div>
+                                            <div class="display-4 fw-bold" x-text="formatCurrency(totalRevenue)"></div>
                                             <div class="ms-3">
-                                                <div class="text-success small">
-                                                    <i class="bi bi-arrow-up"></i> 2.5% so với tháng trước
-                                                </div>
-                                                <div class="text-muted small">Từ trước đến nay</div>
+                                                <div class="text-success small">Từ trước đến nay</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Khối 2: Doanh thu lọc theo thời gian -->
+                        <!-- 2. Doanh thu theo thời gian (chỉ giữ Hôm nay, các phần còn lại giữ static tạm) -->
                         <div class="row g-4 mb-4">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header d-flex justify-content-between align-items-center">
                                         <h5 class="card-title mb-0">DOANH THU THEO THỜI GIAN</h5>
-                                        <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-outline-primary active">Hôm nay</button>
-                                            <button type="button" class="btn btn-outline-primary">Tuần này</button>
-                                            <button type="button" class="btn btn-outline-primary">Tháng này</button>
-                                            <button type="button" class="btn btn-outline-primary">Năm này</button>
-                                        </div>
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="text-center p-3 border rounded">
-                                                    <div class="text-muted small">Hôm nay</div>
-                                                    <div class="h4 fw-bold mt-2">$3,245.50</div>
-                                                    <div class="text-success small mt-1">
-                                                        <i class="bi bi-arrow-up"></i> 12.5%
-                                                    </div>
-                                                </div>
+                                            <div class="col-md-3 text-center p-3 border rounded">
+                                                <div class="text-muted small">Hôm nay</div>
+                                                <div class="h4 fw-bold mt-2" x-text="formatCurrency(todayRevenue)"></div>
+                                                <div class="text-success small mt-1" x-text="growth > 0 ? `+${growth.toFixed(1)}%` : `${growth.toFixed(1)}%`"></div>
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="text-center p-3 border rounded">
-                                                    <div class="text-muted small">Tuần này</div>
-                                                    <div class="h4 fw-bold mt-2">$18,745.00</div>
-                                                    <div class="text-success small mt-1">
-                                                        <i class="bi bi-arrow-up"></i> 8.2%
-                                                    </div>
-                                                </div>
+                                            <div class="col-md-3 text-center p-3 border rounded">
+                                                <div class="text-muted small">Tuần này</div>
+                                                <div class="h4 fw-bold mt-2">$18,745.00</div>
+                                                <div class="text-success small mt-1">+8.2%</div>
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="text-center p-3 border rounded">
-                                                    <div class="text-muted small">Tháng này</div>
-                                                    <div class="h4 fw-bold mt-2">$45,672.30</div>
-                                                    <div class="text-success small mt-1">
-                                                        <i class="bi bi-arrow-up"></i> 15.3%
-                                                    </div>
-                                                </div>
+                                            <div class="col-md-3 text-center p-3 border rounded">
+                                                <div class="text-muted small">Tháng này</div>
+                                                <div class="h4 fw-bold mt-2">$45,672.30</div>
+                                                <div class="text-success small mt-1">+15.3%</div>
                                             </div>
-                                            <div class="col-md-3">
-                                                <div class="text-center p-3 border rounded">
-                                                    <div class="text-muted small">Năm nay</div>
-                                                    <div class="h4 fw-bold mt-2">$89,124.75</div>
-                                                    <div class="text-success small mt-1">
-                                                        <i class="bi bi-arrow-up"></i> 22.7%
-                                                    </div>
-                                                </div>
+                                            <div class="col-md-3 text-center p-3 border rounded">
+                                                <div class="text-muted small">Năm nay</div>
+                                                <div class="h4 fw-bold mt-2">$89,124.75</div>
+                                                <div class="text-success small mt-1">+22.7%</div>
                                             </div>
                                         </div>
                                     </div>
@@ -297,7 +161,7 @@
                             </div>
                         </div>
 
-                        <!-- Khối 3: Danh sách đơn hàng mới nhất -->
+                        <!-- 3. Đơn hàng mới nhất (dynamic) -->
                         <div class="row g-4 mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -319,93 +183,54 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr>
-                                                        <td class="fw-bold">#ORD-001245</td>
-                                                        <td>Nguyễn Văn A</td>
-                                                        <td>15/11/2023</td>
-                                                        <td>3 sản phẩm</td>
-                                                        <td class="fw-bold text-primary">$245.50</td>
-                                                        <td><span class="badge bg-success">Hoàn thành</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="fw-bold">#ORD-001244</td>
-                                                        <td>Trần Thị B</td>
-                                                        <td>15/11/2023</td>
-                                                        <td>2 sản phẩm</td>
-                                                        <td class="fw-bold text-primary">$189.99</td>
-                                                        <td><span class="badge bg-success">Hoàn thành</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="fw-bold">#ORD-001243</td>
-                                                        <td>Lê Văn C</td>
-                                                        <td>14/11/2023</td>
-                                                        <td>5 sản phẩm</td>
-                                                        <td class="fw-bold text-primary">$456.75</td>
-                                                        <td><span class="badge bg-warning">Đang xử lý</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="fw-bold">#ORD-001242</td>
-                                                        <td>Phạm Thị D</td>
-                                                        <td>14/11/2023</td>
-                                                        <td>1 sản phẩm</td>
-                                                        <td class="fw-bold text-primary">$89.50</td>
-                                                        <td><span class="badge bg-success">Hoàn thành</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="fw-bold">#ORD-001241</td>
-                                                        <td>Hoàng Văn E</td>
-                                                        <td>13/11/2023</td>
-                                                        <td>4 sản phẩm</td>
-                                                        <td class="fw-bold text-primary">$324.25</td>
-                                                        <td><span class="badge bg-danger">Đã hủy</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="fw-bold">#ORD-001240</td>
-                                                        <td>Vũ Thị F</td>
-                                                        <td>13/11/2023</td>
-                                                        <td>2 sản phẩm</td>
-                                                        <td class="fw-bold text-primary">$156.80</td>
-                                                        <td><span class="badge bg-success">Hoàn thành</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="fw-bold">#ORD-001239</td>
-                                                        <td>Đặng Văn G</td>
-                                                        <td>12/11/2023</td>
-                                                        <td>3 sản phẩm</td>
-                                                        <td class="fw-bold text-primary">$278.90</td>
-                                                        <td><span class="badge bg-warning">Đang xử lý</span></td>
-                                                    </tr>
+                                                    <template x-for="order in recentOrders" :key="order._id">
+                                                        <tr>
+                                                            <td class="fw-bold" x-text="order.orderId || '#ORD-' + order._id.slice(-6)"></td>
+                                                            <td x-text="order.userName || 'Khách lẻ'"></td>
+                                                            <td x-text="new Date(order.createdAt).toLocaleDateString('vi-VN')"></td>
+                                                            <td x-text="order.items.length + ' sản phẩm'"></td>
+                                                            <td class="fw-bold text-primary" x-text="formatCurrency(order.total)"></td>
+                                                            <td>
+                                                                <span 
+                                                                    class="badge"
+                                                                    :class="{
+                                                                        'bg-success': order.status === 'delivered',
+                                                                        'bg-warning': order.status === 'processing' || order.status === 'shipping',
+                                                                        'bg-danger': order.status === 'cancelled'
+                                                                    }"
+                                                                    x-text="{
+                                                                        delivered: 'Hoàn thành',
+                                                                        processing: 'Đang xử lý',
+                                                                        shipping: 'Đang giao',
+                                                                        cancelled: 'Đã hủy'
+                                                                    }[order.status] || order.status"></span>
+                                                            </td>
+                                                        </tr>
+                                                    </template>
                                                 </tbody>
                                             </table>
                                         </div>
-                                        <div class="card-footer text-center">
-                                            <small class="text-muted scroll-indicator">Cuộn xuống để xem thêm đơn hàng</small>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Khối 4: Phương thức thanh toán -->
+                        <!-- 4. Phương thức thanh toán -->
                         <div class="row g-4 mb-4">
                             <div class="col-md-6">
                                 <div class="card h-100 payment-method-card">
-                                    <div class="card-header">
-                                        <h5 class="card-title mb-0">THANH TOÁN TIỀN MẶT</h5>
-                                    </div>
+                                    <div class="card-header"><h5 class="card-title mb-0">THANH TOÁN TIỀN MẶT</h5></div>
                                     <div class="card-body">
                                         <div class="d-flex align-items-center">
-                                            <div class="display-5 fw-bold text-success">$45,672.30</div>
+                                            <div class="display-5 fw-bold text-success" x-text="formatCurrency(paymentBreakdown.cod)"></div>
                                             <div class="ms-3">
                                                 <div class="text-muted small">Tổng doanh thu</div>
-                                                <div class="text-success small">
-                                                    <i class="bi bi-arrow-up"></i> 36.5% tổng doanh thu
-                                                </div>
+                                                <div class="text-success small" x-text="formatPercentage((paymentBreakdown.cod/totalRevenue)*100) + ' tổng doanh thu'"></div>
                                             </div>
                                         </div>
                                         <div class="mt-3">
                                             <div class="progress progress-custom">
-                                                <div class="progress-bar bg-success" style="width: 36.5%"></div>
+                                                <div class="progress-bar bg-success" :style="{ width: (paymentBreakdown.cod/totalRevenue*100) + '%' }"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -413,22 +238,18 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="card h-100 payment-method-card">
-                                    <div class="card-header">
-                                        <h5 class="card-title mb-0">THANH TOÁN CHUYỂN KHOẢN (Momo/Zalopay)</h5>
-                                    </div>
+                                    <div class="card-header"><h5 class="card-title mb-0">THANH TOÁN CHUYỀN KHOẢN (Momo/Zalopay)</h5></div>
                                     <div class="card-body">
                                         <div class="d-flex align-items-center">
-                                            <div class="display-5 fw-bold text-primary">$78,919.70</div>
+                                            <div class="display-5 fw-bold text-primary" x-text="formatCurrency(paymentBreakdown.momo)"></div>
                                             <div class="ms-3">
                                                 <div class="text-muted small">Tổng doanh thu</div>
-                                                <div class="text-success small">
-                                                    <i class="bi bi-arrow-up"></i> 63.5% tổng doanh thu
-                                                </div>
+                                                <div class="text-success small" x-text="formatPercentage((paymentBreakdown.momo/totalRevenue)*100) + ' tổng doanh thu'"></div>
                                             </div>
                                         </div>
                                         <div class="mt-3">
                                             <div class="progress progress-custom">
-                                                <div class="progress-bar bg-primary" style="width: 63.5%"></div>
+                                                <div class="progress-bar bg-primary" :style="{ width: (paymentBreakdown.momo/totalRevenue*100) + '%' }"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -436,99 +257,55 @@
                             </div>
                         </div>
 
-                        <!-- Khối 5: Doanh thu theo danh mục -->
+                        <!-- 5. Doanh thu theo danh mục (dynamic) -->
                         <div class="row g-4 mb-4">
                             <div class="col-12">
                                 <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="card-title mb-0">DOANH THU THEO DANH MỤC</h5>
-                                    </div>
+                                    <div class="card-header"><h5 class="card-title mb-0">DOANH THU THEO DANH MỤC</h5></div>
                                     <div class="card-body p-0">
                                         <div class="list-group list-group-flush">
-                                            <div class="list-group-item d-flex justify-content-between align-items-center category-item">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-3 bg-primary bg-opacity-10 p-2 rounded">
-                                                        <i class="bi bi-cup-straw text-primary"></i>
+                                            <template x-for="cat in topCategories" :key="cat._id">
+                                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="me-3 bg-primary bg-opacity-10 p-2 rounded">
+                                                            <i class="bi bi-cup-straw text-primary"></i>
+                                                        </div>
+                                                        <div>
+                                                            <div class="fw-medium" x-text="cat._id"></div>
+                                                            <small class="text-muted">Danh mục</small>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <div class="fw-medium">Đồ uống</div>
-                                                        <small class="text-muted">Nước giải khát, cà phê, trà</small>
-                                                    </div>
-                                                </div>
-                                                <div class="text-end">
-                                                    <div class="h5 fw-bold mb-0">$45,280.50</div>
-                                                    <small class="text-success">36.3% tổng doanh thu</small>
-                                                </div>
-                                            </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center category-item">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-3 bg-success bg-opacity-10 p-2 rounded">
-                                                        <i class="bi bi-egg-fried text-success"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-medium">Món chính</div>
-                                                        <small class="text-muted">Cơm, phở, bún, mì</small>
+                                                    <div class="text-end">
+                                                        <div class="h5 fw-bold mb-0" x-text="formatCurrency(cat.revenue)"></div>
+                                                        <small class="text-success" x-text="formatPercentage((cat.revenue/totalRevenue)*100) + ' tổng doanh thu'"></small>
                                                     </div>
                                                 </div>
-                                                <div class="text-end">
-                                                    <div class="h5 fw-bold mb-0">$38,745.20</div>
-                                                    <small class="text-success">31.1% tổng doanh thu</small>
-                                                </div>
-                                            </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center category-item">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-3 bg-warning bg-opacity-10 p-2 rounded">
-                                                        <i class="bi bi-cake2 text-warning"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-medium">Đồ tráng miệng</div>
-                                                        <small class="text-muted">Bánh ngọt, kem, chè</small>
-                                                    </div>
-                                                </div>
-                                                <div class="text-end">
-                                                    <div class="h5 fw-bold mb-0">$24,567.80</div>
-                                                    <small class="text-success">19.7% tổng doanh thu</small>
-                                                </div>
-                                            </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center category-item">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-3 bg-info bg-opacity-10 p-2 rounded">
-                                                        <i class="bi bi-basket text-info"></i>
-                                                    </div>
-                                                    <div>
-                                                        <div class="fw-medium">Đồ ăn nhanh</div>
-                                                        <small class="text-muted">Hamburger, pizza, gà rán</small>
-                                                    </div>
-                                                </div>
-                                                <div class="text-end">
-                                                    <div class="h5 fw-bold mb-0">$15,998.50</div>
-                                                    <small class="text-success">12.9% tổng doanh thu</small>
-                                                </div>
-                                            </div>
+                                            </template>
                                         </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Dãy cuối: Tổng kết doanh thu hôm nay -->
+                        <!-- 6. Tổng kết hôm nay -->
                         <div class="row">
                             <div class="col-12">
                                 <div class="card revenue-summary">
                                     <div class="card-body text-center py-4">
                                         <h4 class="card-title mb-3">TỔNG KẾT DOANH THU HÔM NAY</h4>
-                                        <div class="display-3 fw-bold mb-3">$3,245.50</div>
+                                        <div class="display-3 fw-bold mb-3" x-text="formatCurrency(todayRevenue)"></div>
                                         <div class="row">
                                             <div class="col-md-4">
-                                                <div class="h5">Đơn hàng: 48</div>
-                                                <small class="opacity-75">Trung bình $67.61/đơn</small>
+                                                <div class="h5">Đơn hàng: <span x-text="todayOrders"></span></div>
+                                                <small class="opacity-75">Trung bình <span x-text="formatCurrency(todayRevenue/todayOrders || 0) + '/đơn'"></span></small>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="h5">Khách hàng: 42</div>
-                                                <small class="opacity-75">Trung bình $77.27/khách</small>
+                                                <div class="h5">Khách hàng: <span x-text="todayCustomers"></span></div>
+                                                <small class="opacity-75">Trung bình <span x-text="formatCurrency(todayRevenue/todayCustomers || 0) + '/khách'"></span></small>
                                             </div>
                                             <div class="col-md-4">
-                                                <div class="h5">Tăng trưởng: +12.5%</div>
+                                                <div class="h5">Tăng trưởng: <span :class="growth >= 0 ? 'text-success' : 'text-danger'" x-text="(growth > 0 ? '+' : '') + growth.toFixed(1) + '%'"></span></div>
                                                 <small class="opacity-75">So với hôm qua</small>
                                             </div>
                                         </div>
@@ -536,93 +313,35 @@
                                 </div>
                             </div>
                         </div>
-                        
-                    </div> <!-- End Analytics Container -->
-
+                    </div> <!-- End x-data -->
                 </div>
             </main>
-
-            <!-- Footer -->
-            <footer class="admin-footer">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p class="mb-0 text-muted">© 2025 Modern Bootstrap Admin Template</p>
-                        </div>
-                        <div class="col-md-6 text-md-end">
-                            <p class="mb-0 text-muted">Built with Bootstrap 5.3.7</p>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-
-        </div> <!-- /.admin-wrapper -->
+        </div>
     </div>
 
-    <!-- Toast Container -->
-    <div aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 11">
-        <div id="toast-container"></div>
-    </div>
-
-    <!-- Scripts -->
-    <!-- Alpine.js -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.0/dist/cdn.min.js" defer></script>
-    
-    <!-- ApexCharts -->
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.35.0"></script>
-    
-    <!-- Analytics Manager -->
-    <script src="/scripts/analytics-manager.js"></script>
-    
-    <!-- Main App Script -->
+    <!-- Scripts – ĐÃ SỬA ĐÚNG THỨ TỰ ĐỂ KHÔNG BỊ LỖI ALPINE -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/scripts/components/analytics.js"></script>
     <script type="module" src="/scripts/main.js"></script>
 
+    <!-- Sidebar toggle -->
     <script>
-      // Initialize analytics page
-      document.addEventListener('DOMContentLoaded', () => {
-        // Initialize analytics
-        if (typeof initializeAnalytics === 'function') {
-          initializeAnalytics();
-        }
-        
-        // Sidebar toggle functionality
-        const toggleButton = document.querySelector('[data-sidebar-toggle]');
-        const wrapper = document.getElementById('admin-wrapper');
-
-        if (toggleButton && wrapper) {
-          // Set initial state from localStorage
-          const isCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
-          if (isCollapsed) {
-            wrapper.classList.add('sidebar-collapsed');
-            toggleButton.classList.add('is-active');
-          }
-
-          // Attach click listener
-          toggleButton.addEventListener('click', () => {
-            const isCurrentlyCollapsed = wrapper.classList.contains('sidebar-collapsed');
-            
-            if (isCurrentlyCollapsed) {
-              wrapper.classList.remove('sidebar-collapsed');
-              toggleButton.classList.remove('is-active');
-              localStorage.setItem('sidebar-collapsed', 'false');
-            } else {
-              wrapper.classList.add('sidebar-collapsed');
-              toggleButton.classList.add('is-active');
-              localStorage.setItem('sidebar-collapsed', 'true');
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.querySelector('[data-sidebar-toggle]');
+            const wrapper = document.getElementById('admin-wrapper');
+            if (btn && wrapper) {
+                if (localStorage.getItem('sidebar-collapsed') === 'true') {
+                    wrapper.classList.add('sidebar-collapsed');
+                    btn.classList.add('is-active');
+                }
+                btn.addEventListener('click', () => {
+                    wrapper.classList.toggle('sidebar-collapsed');
+                    btn.classList.toggle('is-active');
+                    localStorage.setItem('sidebar-collapsed', wrapper.classList.contains('sidebar-collapsed'));
+                });
             }
-          });
-        }
-        
-        // Date range filter functionality
-        const dateRangeInputs = document.querySelectorAll('input[name="dateRange"]');
-        dateRangeInputs.forEach(input => {
-          input.addEventListener('change', function() {
-            const selectedValue = this.id;
-            console.log('Date range changed to:', selectedValue);
-            // You can add date range filtering logic here
-          });
         });
-      });
     </script>
 </body>
 </html>

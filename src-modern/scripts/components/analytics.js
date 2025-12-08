@@ -1,491 +1,315 @@
-import Alpine from 'alpinejs';
-
+// analytics.js (Frontend script with updates to handle payment breakdown and formatting)
 document.addEventListener('alpine:init', () => {
   Alpine.data('analyticsComponent', () => ({
-    // Core data
-    metrics: {
-        revenue: 124592,
-        visitors: 45672,
-        conversionRate: 3.45,
-        bounceRate: 24.8
-    },
+    // Core metrics
+    totalRevenue: 0,
+    newUsers: 0,
+    activeShops: 0,
+    totalProducts: 0,
+    revenueLast30: 0,
+    ordersLast30: 0,
+    avgOrderValue: 0,
+    paymentBreakdown: { cod: 0, momo: 0 },
     
-    // Real-time data
-    realTimeUsers: 1247,
-    pageViews: 8452,
-    sessions: 2931,
+    // Real-time simulation (since no real-time backend, simulate)
+    realTimeUsers: 0,
+    
+    // Chart data
+    revenueData: [],
+    ageData: [],
+    genderData: [ // Mock since no gender in model
+      { label: 'Nam', value: 55, color: '#007bff' },
+      { label: 'Nữ', value: 40, color: '#ff69b4' },
+      { label: 'Khác', value: 5, color: '#6c757d' }
+    ],
+    
+    // Lists
+    topShops: [],
+    recentOrders: [],
+    topCategories: [],
+    
+    // Daily summary
+    todayRevenue: 0,
+    todayOrders: 0,
+    todayCustomers: 0,
+    growth: 0,
     
     // Chart instances
     charts: {},
     
-    // Traffic sources data
-    trafficSources: [
-        { name: 'Organic Search', percentage: 42.3, visitors: 19314, color: '#007bff' },
-        { name: 'Direct', percentage: 31.8, visitors: 14519, color: '#28a745' },
-        { name: 'Social Media', percentage: 16.4, visitors: 7490, color: '#fd7e14' },
-        { name: 'Referral', percentage: 9.5, visitors: 4349, color: '#e74c3c' }
-    ],
-    
-    // Top pages data
-    topPages: [
-        { path: '/dashboard', title: 'Main Dashboard', views: 12847, uniqueViews: 8921, avgTime: '4m 32s', bounceRate: 22.1, conversion: 8.4 },
-        { path: '/analytics', title: 'Analytics Page', views: 9234, uniqueViews: 7156, avgTime: '6m 18s', bounceRate: 18.7, conversion: 12.3 },
-        { path: '/products', title: 'Product Catalog', views: 7892, uniqueViews: 5467, avgTime: '3m 45s', bounceRate: 45.2, conversion: 6.7 },
-        { path: '/checkout', title: 'Checkout Process', views: 4567, uniqueViews: 3891, avgTime: '2m 23s', bounceRate: 15.6, conversion: 67.8 },
-        { path: '/contact', title: 'Contact Form', views: 3421, uniqueViews: 2876, avgTime: '1m 54s', bounceRate: 68.4, conversion: 3.2 }
-    ],
-    
-    // Geographic data
-    geographicData: [
-        { name: 'United States', code: 'US', percentage: 38.2, visitors: 17446 },
-        { name: 'United Kingdom', code: 'GB', percentage: 22.7, visitors: 10367 },
-        { name: 'Canada', code: 'CA', percentage: 15.8, visitors: 7215 },
-        { name: 'Germany', code: 'DE', percentage: 12.4, visitors: 5663 },
-        { name: 'Australia', code: 'AU', percentage: 10.9, visitors: 4981 }
-    ],
-    
-    // Device data
-    deviceData: [
-        { type: 'Desktop', percentage: 68.4, users: 31247, icon: 'laptop', color: 'primary' },
-        { type: 'Mobile', percentage: 24.8, users: 11327, icon: 'phone', color: 'success' },
-        { type: 'Tablet', percentage: 6.8, users: 3098, icon: 'tablet', color: 'warning' }
-    ],
-    
-    // Initialize component
-    init() {
-        this.$nextTick(() => {
-            this.initCharts();
-            this.startRealTimeUpdates();
-        });
+    async init() {
+      await this.fetchAllData();
+      this.initCharts();
+      this.startRealTimeSimulation();
+      this.updateDOM(); // New method to update static elements if not using x-text everywhere
     },
     
-    // Clear existing charts to prevent duplicates
-    clearExistingCharts() {
-        Object.keys(this.charts).forEach(chartKey => {
-            if (this.charts[chartKey] && this.charts[chartKey].destroy) {
-                this.charts[chartKey].destroy();
-            }
-        });
-        this.charts = {};
+    async fetchAllData() {
+      try {
+        // Fetch summary
+        const summaryRes = await fetch('/api/analytics/summary');
+        const summary = await summaryRes.json();
+        this.totalRevenue = summary.totalRevenueAllTime || 0;
+        this.revenueLast30 = summary.revenueLast30Days || 0;
+        this.ordersLast30 = summary.ordersLast30Days || 0;
+        this.newUsers = summary.newUsersLast30Days || 0;
+        this.totalProducts = summary.totalProducts || 0;
+        this.avgOrderValue = summary.avgOrderValue || 0;
+        this.activeShops = summary.activeShops || 0;
+        this.todayRevenue = summary.todayRevenue || 0;
+        this.todayOrders = summary.todayOrders || 0;
+        this.todayCustomers = summary.todayCustomers || 0;
+        this.growth = summary.growth || 0;
+        this.paymentBreakdown = summary.paymentBreakdown || { cod: 0, momo: 0 };
+
+        // Fetch revenue daily for chart
+        const revenueRes = await fetch('/api/analytics/revenue-daily');
+        this.revenueData = await revenueRes.json();
+
+        // Fetch user ages
+        const agesRes = await fetch('/api/analytics/user-ages');
+        const ages = await agesRes.json();
+        this.ageData = ages.map(group => ({
+          label: group._id === 'Unknown' ? 'Không xác định' : `${group._id} - ${group._id + 9}`,
+          value: group.count,
+          color: this.getRandomColor()
+        }));
+
+        // Fetch top shops
+        const shopsRes = await fetch('/api/analytics/top-shops');
+        this.topShops = await shopsRes.json();
+
+        // Fetch recent orders
+        const ordersRes = await fetch('/api/orders?limit=10');
+        this.recentOrders = (await ordersRes.json()).orders || [];
+
+        // Fetch top categories
+        const catsRes = await fetch('/api/analytics/top-categories');
+        this.topCategories = await catsRes.json();
+
+      } catch (err) {
+        console.error('Error fetching analytics data:', err);
+      }
     },
     
-    // Initialize all charts
+    // New method to update DOM elements (if HTML doesn't use x-text, but ideally use x-text in HTML)
+    updateDOM() {
+      // Update total revenue
+      const totalRevElem = document.querySelector('.revenue-summary .display-4');
+      if (totalRevElem) totalRevElem.textContent = this.formatCurrency(this.totalRevenue);
+
+      // Update cash payment
+      const cashElem = document.querySelector('.payment-method-card:nth-child(1) .display-5');
+      if (cashElem) cashElem.textContent = this.formatCurrency(this.paymentBreakdown.cod);
+      const cashPct = document.querySelector('.payment-method-card:nth-child(1) .text-success small');
+      if (cashPct) cashPct.textContent = this.formatPercentage((this.paymentBreakdown.cod / this.totalRevenue) * 100) + ' tổng doanh thu';
+
+      // Update transfer payment
+      const transferElem = document.querySelector('.payment-method-card:nth-child(2) .display-5');
+      if (transferElem) transferElem.textContent = this.formatCurrency(this.paymentBreakdown.momo);
+      const transferPct = document.querySelector('.payment-method-card:nth-child(2) .text-success small');
+      if (transferPct) transferPct.textContent = this.formatPercentage((this.paymentBreakdown.momo / this.totalRevenue) * 100) + ' tổng doanh thu';
+
+      // Update today summary (assuming selectors match HTML structure)
+      const todayRevElem = document.querySelector('.revenue-summary:last-child .display-3');
+      if (todayRevElem) todayRevElem.textContent = this.formatCurrency(this.todayRevenue);
+      const ordersElem = document.querySelector('.revenue-summary:last-child .col-md-4:nth-child(1) .h5');
+      if (ordersElem) ordersElem.textContent = 'Đơn hàng: ' + this.formatNumber(this.todayOrders);
+      const avgOrderElem = document.querySelector('.revenue-summary:last-child .col-md-4:nth-child(1) small');
+      if (avgOrderElem) avgOrderElem.textContent = 'Trung bình ' + this.formatCurrency(this.todayRevenue / this.todayOrders || 0) + '/đơn';
+      const customersElem = document.querySelector('.revenue-summary:last-child .col-md-4:nth-child(2) .h5');
+      if (customersElem) customersElem.textContent = 'Khách hàng: ' + this.formatNumber(this.todayCustomers);
+      const avgCustomerElem = document.querySelector('.revenue-summary:last-child .col-md-4:nth-child(2) small');
+      if (avgCustomerElem) avgCustomerElem.textContent = 'Trung bình ' + this.formatCurrency(this.todayRevenue / this.todayCustomers || 0) + '/khách';
+      const growthElem = document.querySelector('.revenue-summary:last-child .col-md-4:nth-child(3) .h5');
+      if (growthElem) growthElem.textContent = 'Tăng trưởng: ' + (this.growth > 0 ? '+' : '') + this.formatPercentage(this.growth);
+    },
+    
     initCharts() {
-        this.clearExistingCharts();
-        
-        this.initRevenueChart();
-        this.initTrafficSourcesChart();
-        this.initBehaviorChart();
-        this.initRealTimeChart();
-        this.initBrowserChart();
+      this.clearExistingCharts();
+      this.initRevenueChart();
+      this.initRealTimeChart();
+      this.initAgeChart();
+      this.initGenderChart();
     },
     
-    // Revenue analytics chart
+    clearExistingCharts() {
+      Object.keys(this.charts).forEach(key => {
+        if (this.charts[key] && this.charts[key].destroy) {
+          this.charts[key].destroy();
+        }
+      });
+      this.charts = {};
+    },
+    
     initRevenueChart() {
-        const revenueOptions = {
-            series: [{
-                name: 'Revenue',
-                data: [8200, 9100, 7800, 10200, 11500, 9800, 12400, 11200, 10800, 13200, 12100, 14200, 13800, 15100]
-            }, {
-                name: 'Profit',
-                data: [3100, 3800, 2900, 4200, 4800, 3900, 5200, 4600, 4200, 5800, 5100, 6200, 5900, 6800]
-            }],
-            chart: {
-                height: 350,
-                type: 'area',
-                toolbar: {
-                    show: false
-                },
-                zoom: {
-                    enabled: false
-                },
-                sparkline: {
-                    enabled: false
-                },
-                redrawOnParentResize: true,
-                redrawOnWindowResize: true
-            },
-            responsive: [{
-                breakpoint: 1200,
-                options: {
-                    chart: {
-                        height: 300
-                    },
-                    legend: {
-                        position: 'bottom',
-                        horizontalAlign: 'center'
-                    }
-                }
-            }, {
-                breakpoint: 768,
-                options: {
-                    chart: {
-                        height: 250
-                    },
-                    xaxis: {
-                        labels: {
-                            rotate: -45,
-                            rotateAlways: true
-                        }
-                    }
-                }
-            }],
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 2
-            },
-            colors: ['#007bff', '#28a745'],
-            fill: {
-                type: 'gradient',
-                gradient: {
-                    shadeIntensity: 1,
-                    opacityFrom: 0.4,
-                    opacityTo: 0.1,
-                    stops: [0, 90, 100]
-                }
-            },
-            xaxis: {
-                categories: ['Jan 1', 'Jan 3', 'Jan 5', 'Jan 7', 'Jan 9', 'Jan 11', 'Jan 13', 'Jan 15', 'Jan 17', 'Jan 19', 'Jan 21', 'Jan 23', 'Jan 25', 'Jan 27'],
-                labels: {
-                    style: {
-                        fontSize: '12px',
-                        colors: '#6c757d'
-                    }
-                }
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val) {
-                        return '$' + (val / 1000).toFixed(0) + 'K';
-                    },
-                    style: {
-                        fontSize: '12px',
-                        colors: '#6c757d'
-                    }
-                }
-            },
-            grid: {
-                borderColor: '#e9ecef',
-                strokeDashArray: 3
-            },
-            legend: {
-                position: 'top',
-                horizontalAlign: 'right',
-                fontSize: '12px'
-            },
-            tooltip: {
-                y: {
-                    formatter: function (val) {
-                        return '$' + val.toLocaleString();
-                    }
-                }
-            }
-        };
-
-        const chartElement = document.querySelector("#revenueChart");
-        if (chartElement) {
-            // Clear any existing chart instance
-            if (this.charts.revenue) {
-                this.charts.revenue.destroy();
-            }
-
-            this.charts.revenue = new ApexCharts(chartElement, revenueOptions);
-            this.charts.revenue.render();
-
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                if (this.charts.revenue) {
-                    this.charts.revenue.updateOptions({
-                        chart: {
-                            width: '100%'
-                        }
-                    });
-                }
-            });
-        }
+      const dates = this.revenueData.map(d => d._id);
+      const revenues = this.revenueData.map(d => d.total);
+      
+      const options = {
+        series: [{
+          name: 'Doanh thu',
+          data: revenues
+        }],
+        chart: {
+          height: 350,
+          type: 'area',
+          toolbar: { show: false },
+          zoom: { enabled: false }
+        },
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 2 },
+        colors: ['#007bff'],
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.4,
+            opacityTo: 0.1,
+            stops: [0, 90, 100]
+          }
+        },
+        xaxis: {
+          categories: dates,
+          labels: { rotate: -45, style: { fontSize: '12px', colors: '#6c757d' } }
+        },
+        yaxis: {
+          labels: {
+            formatter: val => '$' + (val / 1000).toFixed(0) + 'K',
+            style: { fontSize: '12px', colors: '#6c757d' }
+          }
+        },
+        grid: { borderColor: '#e9ecef', strokeDashArray: 3 },
+        tooltip: { y: { formatter: val => '$' + val.toLocaleString() } }
+      };
+      
+      const chartElement = document.querySelector("#revenueChart");
+      if (chartElement) {
+        this.charts.revenue = new ApexCharts(chartElement, options);
+        this.charts.revenue.render();
+      }
     },
     
-    // Traffic sources pie chart
-    initTrafficSourcesChart() {
-        const trafficOptions = {
-            series: this.trafficSources.map(source => source.percentage),
-            chart: {
-                width: '100%',
-                height: 200,
-                type: 'donut'
-            },
-            labels: this.trafficSources.map(source => source.name),
-            colors: this.trafficSources.map(source => source.color),
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '60%'
-                    }
-                }
-            },
-            legend: {
-                show: false
-            },
-            dataLabels: {
-                enabled: false
-            },
-            tooltip: {
-                y: {
-                    formatter: function (val, { seriesIndex }) {
-                        const source = this.trafficSources[seriesIndex];
-                        return `${val.toFixed(1)}% (${source.visitors.toLocaleString()} visitors)`;
-                    }.bind(this)
-                }
-            }
-        };
-        
-        this.charts.trafficSources = new ApexCharts(document.querySelector("#trafficSourcesChart"), trafficOptions);
-        this.charts.trafficSources.render();
-    },
-    
-    // User behavior funnel chart
-    initBehaviorChart() {
-        const behaviorOptions = {
-            series: [{
-                name: 'Users',
-                data: [45672, 32148, 18934, 12567, 8234, 4512]
-            }],
-            chart: {
-                type: 'bar',
-                height: 300,
-                toolbar: {
-                    show: false
-                }
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: true,
-                    distributed: true,
-                    barHeight: '60%'
-                }
-            },
-            colors: ['#007bff', '#0056b3', '#004085', '#003066', '#002752', '#001e3d'],
-            dataLabels: {
-                enabled: true,
-                formatter: function (val) {
-                    return val.toLocaleString();
-                },
-                style: {
-                    colors: ['#fff']
-                }
-            },
-            xaxis: {
-                categories: ['Page Views', 'Unique Visitors', 'Engaged Users', 'Add to Cart', 'Checkout Started', 'Purchase'],
-                labels: {
-                    formatter: function (val) {
-                        return (val / 1000).toFixed(0) + 'K';
-                    }
-                }
-            },
-            yaxis: {
-                labels: {
-                    style: {
-                        fontSize: '12px'
-                    }
-                }
-            },
-            grid: {
-                show: false
-            },
-            legend: {
-                show: false
-            },
-            tooltip: {
-                y: {
-                    formatter: function (val) {
-                        return val.toLocaleString();
-                    }
-                }
-            }
-        };
-        
-        this.charts.behavior = new ApexCharts(document.querySelector("#behaviorChart"), behaviorOptions);
-        this.charts.behavior.render();
-    },
-    
-    // Real time visitors chart
     initRealTimeChart() {
-        const realTimeOptions = {
-            series: [{
-                name: 'Users',
-                data: this.generateRealTimeData(30, 1200, 1300)
-            }],
-            chart: {
-                height: 150,
-                type: 'line',
-                animations: {
-                    enabled: true,
-                    easing: 'linear',
-                    dynamicAnimation: {
-                        speed: 1000
-                    }
-                },
-                toolbar: {
-                    show: false
-                },
-                zoom: {
-                    enabled: false
-                }
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth',
-                width: 2
-            },
-            colors: ['#fd7e14'],
-            markers: {
-                size: 0
-            },
-            xaxis: {
-                type: 'datetime',
-                range: 30000,
-                labels: {
-                    show: false
-                },
-                axisBorder: {
-                    show: false
-                }
-            },
-            yaxis: {
-                min: 1000,
-                max: 1500,
-                labels: {
-                    show: false
-                }
-            },
-            grid: {
-                show: false
-            },
-            legend: {
-                show: false
-            }
-        };
-        
-        this.charts.realTime = new ApexCharts(document.querySelector("#realTimeChart"), realTimeOptions);
+      const options = {
+        series: [{
+          data: this.generateRealTimeData(30, 100, 200)
+        }],
+        chart: {
+          height: 150,
+          type: 'line',
+          animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 1000 } },
+          toolbar: { show: false },
+          zoom: { enabled: false }
+        },
+        dataLabels: { enabled: false },
+        stroke: { curve: 'smooth', width: 2 },
+        colors: ['#fd7e14'],
+        markers: { size: 0 },
+        xaxis: { type: 'datetime', range: 30000, labels: { show: false }, axisBorder: { show: false } },
+        yaxis: { min: 50, max: 250, labels: { show: false } },
+        grid: { show: false },
+        legend: { show: false }
+      };
+      
+      const chartElement = document.querySelector("#realTimeChart");
+      if (chartElement) {
+        this.charts.realTime = new ApexCharts(chartElement, options);
         this.charts.realTime.render();
-    },
-
-    // Browser usage chart
-    initBrowserChart() {
-        const browserOptions = {
-            series: [58.6, 22.3, 8.1, 5.4, 5.6],
-            chart: {
-                type: 'polarArea',
-                height: 350
-            },
-            labels: ['Chrome', 'Firefox', 'Safari', 'Edge', 'Other'],
-            stroke: {
-                colors: ['#fff']
-            },
-            fill: {
-                opacity: 0.85
-            },
-            legend: {
-                position: 'bottom'
-            },
-            responsive: [{
-                breakpoint: 480,
-                options: {
-                    chart: {
-                        width: 200
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }]
-        };
-
-        this.charts.browser = new ApexCharts(document.querySelector("#browserChart"), browserOptions);
-        this.charts.browser.render();
+      }
     },
     
-    // Generate data for real-time chart
+    initAgeChart() {
+      const series = this.ageData.map(d => d.value);
+      const labels = this.ageData.map(d => d.label);
+      const colors = this.ageData.map(d => d.color);
+      
+      const options = {
+        series,
+        chart: { type: 'pie', height: 300 },
+        labels,
+        colors,
+        legend: { position: 'bottom' },
+        responsive: [{ breakpoint: 480, options: { chart: { width: 200 }, legend: { position: 'bottom' } } }]
+      };
+      
+      const chartElement = document.querySelector("#ageChart");
+      if (chartElement) {
+        this.charts.age = new ApexCharts(chartElement, options);
+        this.charts.age.render();
+      }
+    },
+    
+    initGenderChart() {
+      const series = this.genderData.map(d => d.value);
+      const labels = this.genderData.map(d => d.label);
+      const colors = this.genderData.map(d => d.color);
+      
+      const options = {
+        series,
+        chart: { type: 'pie', height: 300 },
+        labels,
+        colors,
+        legend: { position: 'bottom' },
+        responsive: [{ breakpoint: 480, options: { chart: { width: 200 }, legend: { position: 'bottom' } } }]
+      };
+      
+      const chartElement = document.querySelector("#genderChart");
+      if (chartElement) {
+        this.charts.gender = new ApexCharts(chartElement, options);
+        this.charts.gender.render();
+      }
+    },
+    
+    startRealTimeSimulation() {
+      setInterval(() => {
+        this.updateRealTimeChart();
+        this.realTimeUsers = Math.floor(Math.random() * (200 - 100 + 1)) + 100;
+      }, 2000);
+    },
+    
+    updateRealTimeChart() {
+      if (this.charts.realTime) {
+        const x = new Date().getTime();
+        const y = Math.floor(Math.random() * (200 - 100 + 1)) + 100;
+        let series = this.charts.realTime.w.config.series[0].data.slice();
+        series.push([x, y]);
+        if (series.length > 30) series.shift();
+        this.charts.realTime.updateSeries([{ data: series }]);
+      }
+    },
+    
     generateRealTimeData(count, min, max) {
-        let i = 0;
-        const series = [];
-        const time = new Date().getTime();
-        while (i < count) {
-            const x = time - (count - 1 - i) * 1000;
-            const y = Math.floor(Math.random() * (max - min + 1)) + min;
-            series.push([x, y]);
-            i++;
-        }
-        return series;
+      let i = 0;
+      const series = [];
+      const time = new Date().getTime();
+      while (i < count) {
+        const x = time - (count - 1 - i) * 1000;
+        const y = Math.floor(Math.random() * (max - min + 1)) + min;
+        series.push([x, y]);
+        i++;
+      }
+      return series;
     },
     
-    // Start real time updates
-    startRealTimeUpdates() {
-        setInterval(() => {
-            this.updateRealTimeData();
-            this.updateRealTimeMetrics();
-        }, 1000);
+    getRandomColor() {
+      return '#' + Math.floor(Math.random()*16777215).toString(16);
     },
     
-    // Update real time chart data
-    updateRealTimeData() {
-        if (this.charts.realTime) {
-            const x = new Date().getTime();
-            const y = Math.floor(Math.random() * (1300 - 1200 + 1)) + 1200;
-            
-            let series = this.charts.realTime.w.config.series[0].data.slice();
-            series.push([x, y]);
-            series.shift();
-            
-            this.charts.realTime.updateSeries([{ data: series }]);
-        }
-    },
-    
-    // Update real time metrics
-    updateRealTimeMetrics() {
-        this.realTimeUsers += Math.floor(Math.random() * 21) - 10;
-        this.pageViews += Math.floor(Math.random() * 5) + 1;
-        if (Math.random() > 0.95) {
-            this.sessions += 1;
-        }
-    },
-    
-    // Formatters
     formatCurrency(value) {
-        return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     },
     
     formatNumber(value) {
-        return value.toLocaleString();
+      return value.toLocaleString();
     },
     
     formatPercentage(value) {
-        return value.toFixed(2) + '%';
+      return value.toFixed(1) + '%';
     },
-
-    // Export data function
-    exportData() {
-        const dataToExport = {
-            metrics: this.metrics,
-            trafficSources: this.trafficSources,
-            topPages: this.topPages,
-            geographicData: this.geographicData,
-            deviceData: this.deviceData
-        };
-        
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
-        const a = document.createElement('a');
-        a.setAttribute("href", dataStr);
-        a.setAttribute("download", "analytics_export.json");
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(a.href);
+    
+    formatDate(dateStr) {
+      return new Date(dateStr).toLocaleString();
     }
   }));
-}); 
+});

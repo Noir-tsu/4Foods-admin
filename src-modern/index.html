@@ -12,7 +12,7 @@
     <title>Dashboard | 4Foods Admin</title>
     <meta name="theme-color" content="#6366f1">
     <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="/css/dashboard.css">
+    <link rel="stylesheet" href="./styles/css/dashboard.css">
 </head>
 <body data-page="dashboard" class="admin-layout dashboard">
 
@@ -31,7 +31,7 @@
             <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
                 <div class="container-fluid">
                     <a class="navbar-brand d-flex align-items-center" href="./index.html">
-                        <img src="/assets/images/logo.svg" alt="Logo" height="32" class="me-2">
+                        <img src="/assets/images/logo.svg" alt="Logo" height="32" class="d-inline-block align-text-top me-2">
                         <h1 class="h4 mb-0 fw-bold text-primary">4Foods</h1>
                     </a>
 
@@ -42,36 +42,40 @@
                         </div>
                     </div>
 
-                    <div class="navbar-nav flex-row gap-2">
-                        <button class="btn btn-outline-secondary" data-bs-toggle="tooltip" title="Toggle theme">
+                    <div class="navbar-nav flex-row">
+                        <button class="btn btn-outline-secondary me-2" type="button" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Toggle theme">
                             <i class="bi bi-sun-fill"></i>
                         </button>
-                        <button class="btn btn-outline-secondary" data-fullscreen-toggle data-bs-toggle="tooltip" title="Fullscreen">
-                            <i class="bi bi-arrows-fullscreen"></i>
+                        <button class="btn btn-outline-secondary me-2" type="button" data-fullscreen-toggle data-bs-toggle="tooltip" data-bs-placement="bottom" title="Toggle fullscreen">
+                            <i class="bi bi-arrows-fullscreen icon-hover"></i>
                         </button>
 
-                        <div class="dropdown">
-                            <button class="btn btn-outline-secondary position-relative" data-bs-toggle="dropdown">
+                        <div class="dropdown me-2">
+                            <button class="btn btn-outline-secondary position-relative" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-bell"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><h6 class="dropdown-header">Notifications</h6></li>
-                                <li><a class="dropdown-item" href="#">No notifications</a></li>
+                                <li><a class="dropdown-item" href="#">New user registered</a></li>
+                                <li><a class="dropdown-item" href="#">Server status update</a></li>
+                                <li><a class="dropdown-item" href="#">New message received</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-center" href="#">View all notifications</a></li>
                             </ul>
                         </div>
 
                         <div class="dropdown">
-                            <button class="btn btn-outline-secondary d-flex align-items-center" data-bs-toggle="dropdown">
-                                <img src="/assets/images/avatar-placeholder.svg" width="28" height="28" class="rounded-circle me-2" alt="Admin">
-                                <span class="d-none d-md-inline" id="username">Admin</span>
+                            <button class="btn btn-outline-secondary d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="/assets/images/avatar-placeholder.svg" alt="User Avatar" width="24" height="24" class="rounded-circle me-2">
+                                <span class="d-none d-md-inline">John Doe</span>
                                 <i class="bi bi-chevron-down ms-1"></i>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
                                 <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                             </ul>
                         </div>
                     </div>
@@ -84,96 +88,70 @@
             <div class="sidebar-content">
                 <nav class="sidebar-nav">
                     <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="./index.html">
-                                <i class="bi bi-speedometer2"></i>
-                                <span>Dashboard</span>
-                            </a>
-                        </li>
-                        <li class="nav-item"><a class="nav-link" href="./analytics.html"><i class="bi bi-graph-up"></i> Analytics</a></li>
-                        <li class="nav-item"><a class="nav-link" href="./users.html"><i class="bi bi-people"></i> Users</a></li>
-                        <li class="nav-item"><a class="nav-link" href="./products.html"><i class="bi bi-box-seam"></i> Products</a></li>
-                        <li class="nav-item"><a class="nav-link" href="./orders.html"><i class="bi bi-bag-check"></i> Orders</a></li>
-                        <li class="nav-item"><a class="nav-link" href="./shops.html"><i class="bi bi-shop"></i> Shops</a></li>
-                        <li class="nav-item"><a class="nav-link" href="./calendar.html"><i class="bi bi-calendar3"></i> Calendar</a></li>
-                        <li class="nav-item"><a class="nav-link" href="./settings.html"><i class="bi bi-gear"></i> Settings</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="./index.html"><i class="bi bi-speedometer2"></i> <span>Dashboard</span> <span class="badge bg-primary rounded-pill ms-auto">Active</span></a></li>
+                        <li class="nav-item"><a class="nav-link" href="./analytics.html"><i class="bi bi-graph-up"></i> <span>Analytics</span></a></li>
+                        <li class="nav-item"><a class="nav-link" href="./users.html"><i class="bi bi-people"></i> <span>Users</span></a></li>
+                        <li class="nav-item"><a class="nav-link" href="./products.html"><i class="bi bi-box"></i> <span>Products</span></a></li>
+                        <li class="nav-item"><a class="nav-link" href="./orders.html"><i class="bi bi-bag-check"></i> <span>Orders</span></a></li>
+                        <li class="nav-item"><a class="nav-link" href="./calendar.html"><i class="bi bi-calendar-event"></i> <span>Calendar</span></a></li>
+                        <li class="nav-item mt-3"><small class="text-muted px-3 text-uppercase fw-bold">Admin</small></li>
+                        <li class="nav-item"><a class="nav-link" href="./settings.html"><i class="bi bi-gear"></i> <span>Settings</span></a></li>
                     </ul>
                 </nav>
             </div>
         </aside>
 
-        <!-- Main Content -->
+        <button class="hamburger-menu" type="button" data-sidebar-toggle aria-label="Toggle sidebar">
+            <i class="bi bi-list"></i>
+        </button>
+
+<!-- Main Content -->
         <main class="admin-main">
             <div class="admin-content container-fluid p-4">
 
-                <!-- Tổng quan -->
+                <!-- Tổng quan - 4 ô -->
                 <div class="row g-4 mb-4">
                     <div class="col-12 d-flex justify-content-between align-items-center mb-3">
                         <h2 class="h4 mb-0">Tổng quan</h2>
-                        <button class="btn btn-outline-primary btn-sm" title="Refresh data" id="refresh-btn">
+                        <button class="btn btn-outline-primary btn-sm" id="refresh-btn">
                             <i class="bi bi-arrow-clockwise"></i>
                         </button>
                     </div>
-
-                    <!-- 4 Cards chính -->
                     <div class="col-md-6 col-xl-3">
                         <div class="card overview-card">
                             <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <p class="text-muted mb-2">Doanh thu</p>
-                                        <h3 class="mb-0" id="revenue-current">$0</h3>
-                                    </div>
-                                    <!-- <div class="overview-icon bg-primary-subtle text-primary"><i class="bi bi-currency-dollar"></i></div> -->
-                                </div>
+                                <p class="text-muted mb-2">Doanh thu</p>
+                                <h3 class="mb-0" id="revenue-current">0</h3>
                                 <small class="text-success" id="revenue-change">+0%</small>
                                 <small class="text-muted"> so với tháng trước</small>
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-6 col-xl-3">
                         <div class="card overview-card">
                             <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <p class="text-muted mb-2">Đơn hàng</p>
-                                        <h3 class="mb-0" id="orders-current">0</h3>
-                                    </div>
-                                    <!-- <div class="overview-icon bg-success-subtle text-success"><i class="bi bi-bag-check"></i></div> -->
-                                </div>
+                                <p class="text-muted mb-2">Đơn hàng</p>
+                                <h3 class="mb-0" id="orders-current">0</h3>
                                 <small class="text-success" id="orders-change">+0%</small>
                                 <small class="text-muted"> so với tháng trước</small>
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-6 col-xl-3">
                         <div class="card overview-card">
                             <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <p class="text-muted mb-2">Người dùng</p>
-                                        <h3 class="mb-0" id="users-current">0</h3>
-                                    </div>
-                                    <!-- <div class="overview-icon bg-info-subtle text-info"><i class="bi bi-people"></i></div> -->
-                                </div>
+                                <p class="text-muted mb-2">Người dùng</p>
+                                <h3 class="mb-0" id="users-current">0</h3>
                                 <small class="text-success" id="users-change">+0%</small>
                                 <small class="text-muted"> so với tháng trước</small>
                             </div>
                         </div>
                     </div>
-
                     <div class="col-md-6 col-xl-3">
                         <div class="card overview-card">
                             <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <p class="text-muted mb-2">Cửa hàng</p>
-                                        <h3 class="mb-0" id="shops-current">0</h3>
-                                    </div>
-                                    <!-- <div class="overview-icon bg-warning-subtle text-warning"><i class="bi bi-shop"></i></div> -->
-                                </div>
+                                <p class="text-muted mb-2">Cửa hàng</p>
+                                <h3 class="mb-0" id="shops-current">0</h3>
                                 <small class="text-success" id="shops-change">+0%</small>
                                 <small class="text-muted"> so với tháng trước</small>
                             </div>
@@ -181,48 +159,42 @@
                     </div>
                 </div>
 
-                <!-- Biểu đồ doanh thu + Hoạt động gần đây -->
+                <!-- Doanh thu + Hoạt động -->
                 <div class="row g-4 mb-4">
                     <div class="col-lg-8">
                         <div class="card h-100">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">Doanh thu theo thời gian</h5>
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary active" data-chart-period="7d">7 ngày</button>
-                                    <button class="btn btn-outline-primary" data-chart-period="1m">1 tháng</button>
-                                    <button class="btn btn-outline-primary" data-chart-period="1y">1 năm</button>
+                                    <button class="btn btn-outline-primary active">7 ngày</button>
+                                    <button class="btn btn-outline-primary">1 tháng</button>
+                                    <button class="btn btn-outline-primary">1 năm</button>
                                 </div>
                             </div>
                             <div class="card-body">
-                                <canvas id="revenueChart" height="100"></canvas>
+                                <canvas id="revenueChart" height="120"></canvas>
                             </div>
                         </div>
                     </div>
-
                     <div class="col-lg-4">
                         <div class="card h-100">
                             <div class="card-header"><h5 class="mb-0">Hoạt động gần đây</h5></div>
-                            <div class="card-body">
-                                <div id="recent-activity" class="activity-feed">
-                                    <div class="text-center text-muted py-5">
-                                        <i class="bi bi-clock-history display-6 mb-3"></i>
-                                        <p>Chưa có hoạt động</p>
-                                    </div>
-                                </div>
+                            <div class="card-body p-0">
+                                <div id="recent-activity-list" style="max-height: 380px; overflow-y: auto;"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Đơn hàng gần đây + Trạng thái đơn hàng -->
+                <!-- Đơn hàng + Trạng thái -->
                 <div class="row g-4 mb-4">
                     <div class="col-lg-8">
                         <div class="card h-100">
                             <div class="card-header"><h5 class="mb-0">Đơn hàng gần đây</h5></div>
-                            <div class="card-body">
-                                <div class="table-responsive">
+                            <div class="card-body p-0">
+                                <div style="max-height: 500px; overflow-y: auto;">
                                     <table class="table table-hover mb-0">
-                                        <thead class="table-light">
+                                        <thead class="table-light sticky-top bg-white">
                                             <tr>
                                                 <th>ID</th>
                                                 <th>Khách hàng</th>
@@ -239,7 +211,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="col-lg-4">
                         <div class="card h-100">
                             <div class="card-header"><h5 class="mb-0">Phân bố trạng thái đơn hàng</h5></div>
@@ -257,16 +228,17 @@
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">Tăng trưởng người dùng</h5>
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary active" data-chart-period="7d">7 ngày</button>
-                                    <button class="btn btn-outline-primary" data-chart-period="1m">1 tháng</button>
+                                    <button class="btn btn-outline-primary active">7 ngày</button>
+                                    <button class="btn btn-outline-primary">1 tháng</button>
                                 </div>
                             </div>
                             <div class="card-body">
-                                <canvas id="accountGrowthChart" height="80"></canvas>
+                                <canvas id="accountGrowthChart" height="120"></canvas>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </main>
     </div>
@@ -278,10 +250,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="/scripts/main.js"></script>
-    <script type="module" src="/scripts/managers/DashboardManager.js"></script>
-    <script >
-        document.addEventListener('DOMContentLoaded', initializeDashboard);
-        document.getElementById('refresh-btn')?.addEventListener('click', () => window.dashboard?.refreshData());
-    </script>
+    <script type="module" src="./scripts/components/dashboard.js"></script>
 </body>
 </html>
