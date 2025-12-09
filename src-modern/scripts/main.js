@@ -182,14 +182,25 @@ class AdminApp {
     }
   }
 
-  async initAnalyticsPage() {
-    try {
-      await import('./components/analytics.js');
-      console.log('📊 Analytics page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load analytics page script:', error);
+    async initAnalyticsPage() {
+        try {
+            console.log('📊 Loading Analytics module...');
+
+            // Import module động
+            const module = await import('./components/analytics.js');
+
+            // Gọi hàm đăng ký component
+            if (module.default && typeof module.default === 'function') {
+                module.default(); // Gọi registerAnalyticsComponent()
+            } else {
+                console.warn('⚠️ Analytics module missing default export');
+            }
+
+            console.log('✅ Analytics page registered');
+        } catch (error) {
+            console.error('❌ Failed to load analytics:', error);
+        }
     }
-  }
 
   async initProductsPage() {
     try {
