@@ -22,7 +22,8 @@
   <script type="module" crossorigin src="./assets/vendor-bootstrap-mtNt7MV9.js"></script>
   <script type="module" crossorigin src="./assets/vendor-charts-mx47zOnq.js"></script>
   <script type="module" crossorigin src="./assets/vendor-ui-DwtnxsuI.js"></script>
-  <script type="module" crossorigin src="./assets/main-C46tBrlN.js"></script>
+  <script type="module" crossorigin src="./assets/main-C9__kZE-.js"></script>
+  <script type="module" crossorigin src="./assets/analytics-Cs2sYrSj.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/main-DyLKuzVJ.css">
 </head>
 
@@ -347,31 +348,27 @@
         </div>
     </div>
 
-    <!-- Scripts - FIX HOÀN TOÀN LỖI ALPINE -->
+    <!-- Scripts – Thứ tự đúng để Alpine hoạt động -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-    <!-- analytics.js phải load SAU Alpine -->
-    <script src="/scripts/components/analytics.js"></script>
-
-    <!-- main.js nếu có -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <!-- Sidebar toggle -->
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.querySelector('[data-sidebar-toggle]');
-        const wrapper = document.getElementById('admin-wrapper');
-        if (btn && wrapper) {
-            if (localStorage.getItem('sidebar-collapsed') === 'true') {
-                wrapper.classList.add('sidebar-collapsed');
-                btn.classList.add('is-active');
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.querySelector('[data-sidebar-toggle]');
+            const wrapper = document.getElementById('admin-wrapper');
+            if (btn && wrapper) {
+                if (localStorage.getItem('sidebar-collapsed') === 'true') {
+                    wrapper.classList.add('sidebar-collapsed');
+                    btn.classList.add('is-active');
+                }
+                btn.addEventListener('click', () => {
+                    wrapper.classList.toggle('sidebar-collapsed');
+                    btn.classList.toggle('is-active');
+                    localStorage.setItem('sidebar-collapsed', wrapper.classList.contains('sidebar-collapsed'));
+                });
             }
-            btn.addEventListener('click', () => {
-                wrapper.classList.toggle('sidebar-collapsed');
-                btn.classList.toggle('is-active');
-                localStorage.setItem('sidebar-collapsed', wrapper.classList.contains('sidebar-collapsed'));
-            });
-        }
-    });
+        });
     </script>
 </body>
 </html>

@@ -342,13 +342,15 @@
         </div>
     </div>
 
-    <!-- Scripts – Thứ tự đúng để Alpine hoạt động -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- ✅ SCRIPTS ĐÚNG THỨ TỰ -->
+    
+    <!-- 1. ApexCharts từ CDN (vì không cần bundle) -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <script src="/scripts/components/analytics.js"></script>
-    <script type="module" src="/scripts/main.js"></script>
+    
+    <!-- 2. Main.js (Vite sẽ bundle Alpine + analytics.js vào đây) -->
+    <script type="module" src="./scripts/main.js"></script>
 
-    <!-- Sidebar toggle -->
+    <!-- 3. Sidebar toggle (Vanilla JS, không phụ thuộc Alpine) -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const btn = document.querySelector('[data-sidebar-toggle]');
