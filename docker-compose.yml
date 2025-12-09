@@ -1,0 +1,14 @@
+
+version: '3.8'
+
+services:
+  web-admin:
+    image: nginx:stable-alpine
+    container_name: 4foods-web-admin
+    restart: always
+    
+    volumes:
+      - ./dist-modern:/usr/share/nginx/html:ro
+      
+    ports:
+      - "0.0.0.0:8080:80"
