@@ -329,6 +329,7 @@
                         </div>
                     </div>
 
+                <!-- 1. Biểu đồ doanh thu 30 ngày -->
                 <div class="row g-4 mb-4">
                     <div class="col-12">
                         <div class="card h-100">
@@ -346,7 +347,6 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <!-- Chart container -->
                                 <div id="revenueChart" style="height: 350px; width: 100%;"></div>
                             </div>
                         </div>
@@ -362,7 +362,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
-                                    <div class="display-4 fw-bold text-dark" x-text="formatCurrency(totalRevenue)"></div>
+                                    <div class="display-4 fw-bold text-white" id="total-revenue">0đ</div>
                                     <div class="ms-3 ps-3 border-start">
                                         <div class="text-success small fw-bold">
                                             <i class="bi bi-graph-up-arrow me-1"></i>Tăng trưởng ổn định
@@ -375,7 +375,7 @@
                     </div>
                 </div>
 
-                <!-- 3. Doanh thu theo thời gian (Grid 4 cột) -->
+                <!-- 3. Hiệu suất theo thời gian -->
                 <div class="row g-4 mb-4">
                     <div class="col-12">
                         <div class="card">
@@ -387,39 +387,41 @@
                                     <!-- Hôm nay -->
                                     <div class="col-md-3 p-4">
                                         <div class="text-muted small text-uppercase fw-bold mb-2">Hôm nay</div>
-                                        <div class="h3 fw-bold mb-1" x-text="formatCurrency(todayRevenue)"></div>
-                                        <div class="small fw-bold" :class="growth >= 0 ? 'text-success' : 'text-danger'">
-                                            <i class="bi" :class="growth >= 0 ? 'bi-caret-up-fill' : 'bi-caret-down-fill'"></i>
-                                            <span x-text="(growth > 0 ? '+' : '') + growth.toFixed(1) + '%'"></span>
-                                            <span class="text-muted fw-normal ms-1">vs hôm qua</span>
+                                        <div class="h3 fw-bold mb-1" id="today-revenue">0đ</div>
+                                        <div class="small fw-bold" id="today-growth">
+                                            <i class="bi bi-dash"></i> 0%
                                         </div>
+                                        <small class="text-muted d-block mt-1">vs hôm qua</small>
                                     </div>
+                                    
                                     <!-- Tuần này -->
-                                    <div class="col-md-3 p-4 border-start-md">
+                                    <div class="col-md-3 p-4 border-start">
                                         <div class="text-muted small text-uppercase fw-bold mb-2">Tuần này</div>
-                                        <div class="h3 fw-bold mb-1">$18,745,000</div>
-                                        <div class="small fw-bold text-success">
-                                            <i class="bi bi-caret-up-fill"></i> +8.2%
-                                            <span class="text-muted fw-normal ms-1">vs tuần trước</span>
+                                        <div class="h3 fw-bold mb-1" id="week-revenue">0đ</div>
+                                        <div class="small fw-bold" id="week-growth">
+                                            <i class="bi bi-dash"></i> 0%
                                         </div>
+                                        <small class="text-muted d-block mt-1">vs tuần trước</small>
                                     </div>
+                                    
                                     <!-- Tháng này -->
-                                    <div class="col-md-3 p-4 border-start-md">
+                                    <div class="col-md-3 p-4 border-start">
                                         <div class="text-muted small text-uppercase fw-bold mb-2">Tháng này</div>
-                                        <div class="h3 fw-bold mb-1">$45,672,300</div>
-                                        <div class="small fw-bold text-success">
-                                            <i class="bi bi-caret-up-fill"></i> +15.3%
-                                            <span class="text-muted fw-normal ms-1">vs tháng trước</span>
+                                        <div class="h3 fw-bold mb-1" id="month-revenue">0đ</div>
+                                        <div class="small fw-bold" id="month-growth">
+                                            <i class="bi bi-dash"></i> 0%
                                         </div>
+                                        <small class="text-muted d-block mt-1">vs tháng trước</small>
                                     </div>
+                                    
                                     <!-- Năm nay -->
-                                    <div class="col-md-3 p-4 border-start-md">
+                                    <div class="col-md-3 p-4 border-start">
                                         <div class="text-muted small text-uppercase fw-bold mb-2">Năm nay</div>
-                                        <div class="h3 fw-bold mb-1">$890,124,750</div>
-                                        <div class="small fw-bold text-success">
-                                            <i class="bi bi-caret-up-fill"></i> +22.7%
-                                            <span class="text-muted fw-normal ms-1">vs năm ngoái</span>
+                                        <div class="h3 fw-bold mb-1" id="year-revenue">0đ</div>
+                                        <div class="small fw-bold" id="year-growth">
+                                            <i class="bi bi-dash"></i> 0%
                                         </div>
+                                        <small class="text-muted d-block mt-1">vs năm ngoái</small>
                                     </div>
                                 </div>
                             </div>
@@ -433,9 +435,7 @@
                         <div class="card h-100">
                             <div class="card-header d-flex justify-content-between align-items-center bg-transparent">
                                 <h5 class="card-title mb-0">ĐƠN HÀNG MỚI NHẤT</h5>
-                                <a href="orders.html" class="btn btn-sm btn-light text-primary fw-medium">
-                                    Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
-                                </a>
+                                <a href="orders.html" class="btn btn-sm btn-light text-primary fw-medium">Xem tất cả</a>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
@@ -450,48 +450,8 @@
                                                 <th class="pe-4 text-end">Trạng thái</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="border-top-0">
-                                            <template x-for="order in recentOrders" :key="order._id">
-                                                <tr>
-                                                    <td class="ps-4">
-                                                        <span class="fw-bold font-monospace text-primary" x-text="'#' + order._id.slice(-6).toUpperCase()"></span>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="avatar-circle sm bg-soft-primary text-primary me-2">
-                                                                <span x-text="(order.user?.name || 'K').charAt(0).toUpperCase()"></span>
-                                                            </div>
-                                                            <span class="fw-medium" x-text="order.user?.name || 'Khách lẻ'"></span>
-                                                        </div>
-                                                    </td>
-                                                    <td class="text-muted" x-text="new Date(order.createdAt).toLocaleDateString('vi-VN')"></td>
-                                                    <td>
-                                                        <span class="badge bg-light text-dark border">
-                                                            <i class="bi bi-box-seam me-1"></i>
-                                                            <span x-text="order.items.length"></span> món
-                                                        </span>
-                                                    </td>
-                                                    <td class="fw-bold" x-text="formatCurrency(order.total)"></td>
-                                                    <td class="pe-4 text-end">
-                                                        <span class="badge rounded-pill"
-                                                            :class="{
-                                                                'bg-soft-success text-success': order.status === 'delivered',
-                                                                'bg-soft-warning text-warning': ['processing','shipping','arrived'].includes(order.status),
-                                                                'bg-soft-danger text-danger': order.status === 'cancelled',
-                                                                'bg-soft-info text-info': order.status === 'refund_pending'
-                                                            }"
-                                                            x-text="{
-                                                                delivered: 'Hoàn thành',
-                                                                processing: 'Đang xử lý',
-                                                                shipping: 'Đang giao',
-                                                                arrived: 'Đã đến',
-                                                                cancelled: 'Đã hủy',
-                                                                refund_pending: 'Hoàn tiền'
-                                                            }[order.status] || order.status">
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            </template>
+                                        <tbody class="border-top-0" id="recent-orders-list">
+                                            <!-- JS sẽ render vào đây -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -502,7 +462,6 @@
 
                 <!-- 5. Phương thức thanh toán -->
                 <div class="row g-4 mb-4">
-                    <!-- Tiền mặt (COD) -->
                     <div class="col-md-6">
                         <div class="card h-100 border-0 shadow-sm">
                             <div class="card-body p-4">
@@ -512,22 +471,19 @@
                                     </div>
                                     <div>
                                         <h6 class="text-muted text-uppercase mb-1">Thanh toán Tiền mặt (COD)</h6>
-                                        <h3 class="fw-bold mb-0" x-text="formatCurrency(paymentBreakdown.cod)"></h3>
+                                        <h3 class="fw-bold mb-0" id="cod-amount">0đ</h3>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between text-muted small mb-1">
                                     <span>Tỷ trọng</span>
-                                    <span class="fw-bold text-success" x-text="formatPercentage((paymentBreakdown.cod/totalRevenue)*100) + ' tổng DT'"></span>
+                                    <span class="fw-bold text-success" id="cod-percent">0% tổng DT</span>
                                 </div>
                                 <div class="progress" style="height: 8px;">
-                                    <div class="progress-bar bg-success" role="progressbar" 
-                                        :style="{ width: (paymentBreakdown.cod/totalRevenue*100 || 0) + '%' }"></div>
+                                    <div class="progress-bar bg-success" id="cod-progress" style="width: 0%"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Chuyển khoản (MoMo/Bank) -->
                     <div class="col-md-6">
                         <div class="card h-100 border-0 shadow-sm">
                             <div class="card-body p-4">
@@ -537,16 +493,15 @@
                                     </div>
                                     <div>
                                         <h6 class="text-muted text-uppercase mb-1">Chuyển khoản / Ví điện tử</h6>
-                                        <h3 class="fw-bold mb-0" x-text="formatCurrency(paymentBreakdown.momo)"></h3>
+                                        <h3 class="fw-bold mb-0" id="momo-amount">0đ</h3>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between text-muted small mb-1">
                                     <span>Tỷ trọng</span>
-                                    <span class="fw-bold text-primary" x-text="formatPercentage((paymentBreakdown.momo/totalRevenue)*100) + ' tổng DT'"></span>
+                                    <span class="fw-bold text-primary" id="momo-percent">0% tổng DT</span>
                                 </div>
                                 <div class="progress" style="height: 8px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" 
-                                        :style="{ width: (paymentBreakdown.momo/totalRevenue*100 || 0) + '%' }"></div>
+                                    <div class="progress-bar bg-primary" id="momo-progress" style="width: 0%"></div>
                                 </div>
                             </div>
                         </div>
@@ -561,24 +516,8 @@
                                 <h5 class="card-title mb-0">DOANH THU THEO DANH MỤC</h5>
                             </div>
                             <div class="card-body p-0">
-                                <div class="list-group list-group-flush">
-                                    <template x-for="cat in topCategories" :key="cat._id">
-                                        <div class="list-group-item d-flex justify-content-between align-items-center p-3 border-bottom-0">
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-circle bg-light text-secondary me-3">
-                                                    <i class="bi bi-tag-fill"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold text-dark" x-text="cat._id || 'Chưa phân loại'"></div>
-                                                    <small class="text-muted">Danh mục sản phẩm</small>
-                                                </div>
-                                            </div>
-                                            <div class="text-end">
-                                                <div class="h6 fw-bold mb-0" x-text="formatCurrency(cat.revenue)"></div>
-                                                <small class="text-success fw-medium" x-text="formatPercentage((cat.revenue/totalRevenue)*100) + ' đóng góp'"></small>
-                                            </div>
-                                        </div>
-                                    </template>
+                                <div class="list-group list-group-flush" id="top-categories-list">
+                                    <!-- JS sẽ render vào đây -->
                                 </div>
                             </div>
                         </div>
@@ -590,29 +529,21 @@
                     <div class="col-12">
                         <div class="card bg-primary text-white overflow-hidden">
                             <div class="card-body text-center py-5 position-relative">
-                                <!-- Background Pattern (Optional) -->
-                                <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10" 
-                                    style="background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px);">
-                                </div>
-                                
                                 <div class="position-relative z-1">
                                     <h5 class="text-white-50 text-uppercase letter-spacing-1 mb-2">Tổng kết doanh thu hôm nay</h5>
-                                    <div class="display-3 fw-bold mb-4" x-text="formatCurrency(todayRevenue)"></div>
-                                    
+                                    <div class="display-3 fw-bold mb-4" id="today-summary-revenue">0đ</div>
                                     <div class="row justify-content-center g-4">
                                         <div class="col-md-3 border-end border-white-50">
                                             <div class="h5 mb-0">Đơn hàng</div>
-                                            <div class="fs-4 fw-bold" x-text="todayOrders"></div>
-                                            <small class="text-white-50" x-text="'~' + formatCurrency(todayRevenue/todayOrders || 0) + '/đơn'"></small>
+                                            <div class="fs-4 fw-bold" id="today-orders-count">0</div>
                                         </div>
                                         <div class="col-md-3 border-end border-white-50">
                                             <div class="h5 mb-0">Khách hàng</div>
-                                            <div class="fs-4 fw-bold" x-text="todayCustomers"></div>
-                                            <small class="text-white-50" x-text="'~' + formatCurrency(todayRevenue/todayCustomers || 0) + '/khách'"></small>
+                                            <div class="fs-4 fw-bold" id="today-customers-count">0</div>
                                         </div>
                                         <div class="col-md-3">
                                             <div class="h5 mb-0">Tăng trưởng</div>
-                                            <div class="fs-4 fw-bold text-warning" x-text="(growth > 0 ? '+' : '') + growth.toFixed(1) + '%'"></div>
+                                            <div class="fs-4 fw-bold" id="today-growth-summary">0%</div>
                                             <small class="text-white-50">So với hôm qua</small>
                                         </div>
                                     </div>
@@ -621,7 +552,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </main>
 

@@ -1,744 +1,497 @@
-import Alpine from 'alpinejs';
+// src-modern/scripts/components/users.js
+import ApexCharts from 'apexcharts';
+import { UsersService } from '../utils/services/users.service.js';
 
-document.addEventListener('alpine:init', () => {
-  Alpine.data('userTable', () => ({
-    users: [],
-    filteredUsers: [],
-    selectedUsers: [],
-    currentPage: 1,
-    itemsPerPage: 10,
-    searchQuery: '',
-    statusFilter: '',
-    roleFilter: '',
-    sortField: 'name',
-    sortDirection: 'asc',
-    isLoading: false,
-
-    init() {
-      this.loadSampleData();
-      this.filterUsers();
-      this.$nextTick(() => {
-        this.initCharts();
-      });
-    },
-
-    loadSampleData() {
-        this.users = [
-        {
-            id: 1,
-            name: 'John Doe',
-            email: 'john@example.com',
-            role: 'admin',
-            status: 'active',
-            lastActive: '2 minutes ago',
-            joinDate: '2023-01-15',
-            avatar: '/assets/images/avatar-placeholder.svg',
-            phone: '+1 (555) 123-4567',
-            department: 'Engineering'
-        },
-        {
-            id: 2,
-            name: 'Jane Smith',
-            email: 'jane@example.com',
-            role: 'user',
-            status: 'active',
-            lastActive: '1 hour ago',
-            joinDate: '2023-02-20',
-            avatar: '/assets/images/avatar-placeholder.svg',
-            phone: '+1 (555) 987-6543',
-            department: 'Marketing'
-        },
-        {
-            id: 3,
-            name: 'Mike Johnson',
-            email: 'mike@example.com',
-            role: 'moderator',
-            status: 'pending',
-            lastActive: '1 day ago',
-            joinDate: '2023-03-10',
-            avatar: '/assets/images/avatar-placeholder.svg',
-            phone: '+1 (555) 456-7890',
-            department: 'Support'
-        },
-        {
-            id: 4,
-            name: 'Sarah Wilson',
-            email: 'sarah@example.com',
-            role: 'user',
-            status: 'active',
-            lastActive: '5 minutes ago',
-            joinDate: '2023-04-05',
-            avatar: '/assets/images/avatar-placeholder.svg',
-            phone: '+1 (555) 321-0987',
-            department: 'Sales'
-        },
-        {
-            id: 5,
-            name: 'Bob Brown',
-            email: 'bob@example.com',
-            role: 'user',
-            status: 'inactive',
-            lastActive: '1 week ago',
-            joinDate: '2023-01-30',
-            avatar: '/assets/images/avatar-placeholder.svg',
-            phone: '+1 (555) 654-3210',
-            department: 'HR'
-        },
-        {
-            id: 6,
-            name: 'Alice Davis',
-            email: 'alice@example.com',
-            role: 'admin',
-            status: 'active',
-            lastActive: '30 minutes ago',
-            joinDate: '2022-12-01',
-            avatar: '/assets/images/avatar-placeholder.svg',
-            phone: '+1 (555) 789-0123',
-            department: 'Engineering'
-        },
-        {
-            id: 7,
-            name: 'Tom Miller',
-            email: 'tom@example.com',
-            role: 'user',
-            status: 'active',
-            lastActive: '3 hours ago',
-            joinDate: '2023-05-15',
-            avatar: '/assets/images/avatar-placeholder.svg',
-            phone: '+1 (555) 147-2580',
-            department: 'Design'
-        },
-        {
-            id: 8,
-            name: 'Lisa Garcia',
-            email: 'lisa@example.com',
-            role: 'moderator',
-            status: 'active',
-            lastActive: '1 hour ago',
-            joinDate: '2023-03-25',
-            avatar: '/assets/images/avatar-placeholder.svg',
-            phone: '+1 (555) 369-1470',
-            department: 'Support'
-        }
-        ];
-    },
-
-    // Filtering and Search
-    filterUsers() {
-        this.filteredUsers = this.users.filter(user => {
-        const matchesSearch = this.searchQuery === '' || 
-            user.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            user.email.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            user.department.toLowerCase().includes(this.searchQuery.toLowerCase());
-        
-        const matchesStatus = this.statusFilter === '' || user.status === this.statusFilter;
-        const matchesRole = this.roleFilter === '' || user.role === this.roleFilter;
-        
-        return matchesSearch && matchesStatus && matchesRole;
-        });
-        
-        this.sortUsers();
+export class UsersManager {
+    constructor() {
+        this.charts = {};
+        this.data = {
+            totalUsers: 0,
+            activeUsers: 0,
+            userDistribution: { users: 0, sellers: 0 },
+            recentActivities: [],
+            usersDirectory: []
+        };
+        this.selectedUsers = new Set();
+        this.currentPeriod = '7days';
+        this.filters = {
+            search: '',
+            status: '',
+            role: ''
+        };
         this.currentPage = 1;
-    },
-
-    // Sorting
-    sortBy(field) {
-        if (this.sortField === field) {
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-        this.sortField = field;
-        this.sortDirection = 'asc';
-        }
-        this.sortUsers();
-    },
-
-    sortUsers() {
-        this.filteredUsers.sort((a, b) => {
-        let aVal = a[this.sortField];
-        let bVal = b[this.sortField];
         
-        if (typeof aVal === 'string') {
-            aVal = aVal.toLowerCase();
-            bVal = bVal.toLowerCase();
+        if (document.getElementById('total-users-count')) {
+            this.init();
         }
-        
-        if (this.sortDirection === 'asc') {
-            return aVal > bVal ? 1 : -1;
-        } else {
-            return aVal < bVal ? 1 : -1;
-        }
-        });
-    },
+    }
 
-    // Pagination
-    get paginatedUsers() {
-        const start = (this.currentPage - 1) * this.itemsPerPage;
-        const end = start + this.itemsPerPage;
-        return this.filteredUsers.slice(start, end);
-    },
-
-    get totalPages() {
-        return Math.ceil(this.filteredUsers.length / this.itemsPerPage);
-    },
-
-    get visiblePages() {
-        const delta = 2;
-        const range = [];
-        const rangeWithDots = [];
-        
-        for (let i = Math.max(2, this.currentPage - delta);
-            i <= Math.min(this.totalPages - 1, this.currentPage + delta);
-            i++) {
-        range.push(i);
-        }
-        
-        if (this.currentPage - delta > 2) {
-        rangeWithDots.push(1, '...');
-        } else {
-        rangeWithDots.push(1);
-        }
-        
-        rangeWithDots.push(...range);
-        
-        if (this.currentPage + delta < this.totalPages - 1) {
-        rangeWithDots.push('...', this.totalPages);
-        } else if (this.totalPages > 1) {
-        rangeWithDots.push(this.totalPages);
-        }
-        
-        return rangeWithDots.filter((v, i, a) => a.indexOf(v) === i && v <= this.totalPages);
-    },
-
-    goToPage(page) {
-        if (page >= 1 && page <= this.totalPages) {
-        this.currentPage = page;
-        }
-    },
-
-    // Selection Management
-    toggleAll(checked) {
-        if (checked) {
-            this.selectedUsers = this.paginatedUsers.map(user => user.id);
-        } else {
-            this.selectedUsers = [];
-        }
-    },
-
-    toggleUser(userId, event) {
-        if (event.target.checked) {
-            if (!this.selectedUsers.includes(userId)) {
-                this.selectedUsers.push(userId);
-            }
-        } else {
-            this.selectedUsers = this.selectedUsers.filter(id => id !== userId);
-        }
-    },
-
-    // CRUD Operations
-    createUser(userData) {
-        const newUser = {
-            id: this.users.length + 1,
-            name: `${userData.firstName} ${userData.lastName}`,
-            email: userData.email,
-            role: userData.role,
-            status: userData.status,
-            phone: userData.phone,
-            lastActive: 'Just now',
-            joinDate: new Date().toISOString().split('T')[0],
-            avatar: '/assets/images/avatar-placeholder.svg',
-            department: 'New'
-        };
-        this.users.push(newUser);
-        this.filterUsers();
-    },
-
-    editUser(user) {
-        // Open edit modal with user data
-        const userForm = Alpine.$data(document.querySelector('[x-data="userForm"]'));
-        if (userForm) {
-            const nameParts = user.name.split(' ');
-            userForm.form.firstName = nameParts[0] || '';
-            userForm.form.lastName = nameParts.slice(1).join(' ') || '';
-            userForm.form.email = user.email;
-            userForm.form.role = user.role;
-            userForm.form.status = user.status;
-            userForm.form.phone = user.phone;
-            userForm.editingUserId = user.id;
-        }
-    },
-
-    viewUser(user) {
-        // Navigate to user profile or show user details
-        console.log('Viewing user:', user);
-        // In a real app, this would navigate to user profile page
-    },
-
-    deleteUser(user) {
-        if (confirm(`Are you sure you want to delete ${user.name}?`)) {
-            this.users = this.users.filter(u => u.id !== user.id);
-            this.filterUsers();
-        }
-    },
-
-    // Bulk Operations
-    bulkAction(action) {
-        if (this.selectedUsers.length === 0) {
-            alert('Please select users first');
-            return;
-        }
-
-        const selectedUserObjects = this.users.filter(u => this.selectedUsers.includes(u.id));
-        
-        switch (action) {
-            case 'activate':
-                selectedUserObjects.forEach(user => user.status = 'active');
-                break;
-            case 'deactivate':
-                selectedUserObjects.forEach(user => user.status = 'inactive');
-                break;
-            case 'delete':
-                if (confirm(`Are you sure you want to delete ${this.selectedUsers.length} users?`)) {
-                    this.users = this.users.filter(u => !this.selectedUsers.includes(u.id));
-                }
-                break;
-        }
-        
-        this.selectedUsers = [];
-        this.filterUsers();
-    },
-
-    // Export and Reporting
-    exportUsers() {
-        const csvContent = this.generateCSV(this.filteredUsers);
-        this.downloadCSV(csvContent, 'users-export.csv');
-    },
-
-    generateCSV(users) {
-        const headers = ['ID', 'Name', 'Email', 'Role', 'Status', 'Department', 'Phone', 'Join Date', 'Last Active'];
-        const rows = users.map(user => [
-            user.id,
-            user.name,
-            user.email,
-            user.role,
-            user.status,
-            user.department,
-            user.phone,
-            user.joinDate,
-            user.lastActive
-        ]);
-        
-        return [headers, ...rows].map(row => row.join(',')).join('\n');
-    },
-
-    downloadCSV(content, filename) {
-        const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    },
-
-    sendBulkInvites() {
-        if (this.selectedUsers.length === 0) {
-            alert('Please select users to send invites to');
-            return;
-        }
-        
-        // Simulate sending invites
-        alert(`Sent invites to ${this.selectedUsers.length} users`);
-        this.selectedUsers = [];
-    },
-
-    generateReport() {
-        // Generate and download user report
-        const reportData = {
-            generatedAt: new Date().toISOString(),
-            totalUsers: this.users.length,
-            stats: this.stats,
-            departmentBreakdown: this.departmentStats,
-            recentActivity: this.recentActivities
-        };
-        
-        const jsonContent = JSON.stringify(reportData, null, 2);
-        this.downloadCSV(jsonContent, 'user-report.json');
-    },
-    
-    get stats() {
-        const active = this.users.filter(u => u.status === 'active').length;
-        const pending = this.users.filter(u => u.status === 'pending').length;
-        const inactive = this.users.filter(u => u.status === 'inactive').length;
-        const thisMonth = new Date();
-        const newThisMonth = this.users.filter(u => {
-            const joinDate = new Date(u.joinDate);
-            return joinDate.getMonth() === thisMonth.getMonth() && 
-                   joinDate.getFullYear() === thisMonth.getFullYear();
-        }).length;
-        
-        return {
-            total: this.users.length,
-            active,
-            pending,
-            inactive,
-            newThisMonth,
-            activePercentage: this.users.length > 0 ? (active / this.users.length) * 100 : 0,
-            pendingPercentage: this.users.length > 0 ? (pending / this.users.length) * 100 : 0,
-            inactivePercentage: this.users.length > 0 ? (inactive / this.users.length) * 100 : 0,
-        };
-    },
-
-    get departmentStats() {
-        const counts = this.users.reduce((acc, user) => {
-            acc[user.department] = (acc[user.department] || 0) + 1;
-            return acc;
-        }, {});
-        
-        const colors = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
-        
-        return Object.entries(counts).map(([name, count], index) => ({
-            name,
-            count,
-            percentage: this.users.length > 0 ? Math.round((count / this.users.length) * 100) : 0,
-            color: colors[index % colors.length]
-        }));
-    },
-
-    get recentActivities() {
-        return [
-            { 
-                id: 1,
-                user: 'John Doe', 
-                action: 'logged in', 
-                time: '2 minutes ago', 
-                type: 'login',
-                icon: 'bi-box-arrow-in-right',
-                details: 'User logged in from Chrome on Windows'
-            },
-            { 
-                id: 2,
-                user: 'Jane Smith', 
-                action: 'updated profile', 
-                time: '1 hour ago', 
-                type: 'update',
-                icon: 'bi-person-gear',
-                details: 'Updated contact information and preferences'
-            },
-            { 
-                id: 3,
-                user: 'Mike Johnson', 
-                action: 'created account', 
-                time: '1 day ago', 
-                type: 'create',
-                icon: 'bi-person-plus',
-                details: 'New user account created and activated'
-            },
-            { 
-                id: 4,
-                user: 'Sarah Wilson', 
-                action: 'changed password', 
-                time: '2 days ago', 
-                type: 'security',
-                icon: 'bi-shield-lock',
-                details: 'Password changed for security reasons'
-            },
-            { 
-                id: 5,
-                user: 'Bob Brown', 
-                action: 'logged out', 
-                time: '1 week ago', 
-                type: 'logout',
-                icon: 'bi-box-arrow-right',
-                details: 'User logged out from all devices'
-            }
-        ];
-    },
-
-    get systemAlerts() {
-        return [
-            { 
-                id: 1, 
-                title: 'User Registration Alert',
-                message: 'New user registrations require approval', 
-                type: 'warning', 
-                time: '5 minutes ago' 
-            },
-            { 
-                id: 2, 
-                title: 'Backup Complete',
-                message: 'System backup completed successfully', 
-                type: 'success', 
-                time: '1 hour ago' 
-            },
-            { 
-                id: 3, 
-                title: 'Maintenance Notice',
-                message: 'Database maintenance scheduled for tonight', 
-                type: 'info', 
-                time: '2 hours ago' 
-            }
-        ];
-    },
-    
-    initCharts() {
-        // Active Users Chart
-        const activeUserChartEl = document.querySelector('#activeUserChart');
-        if (activeUserChartEl && !activeUserChartEl.hasAttribute('data-chart-initialized')) {
-            activeUserChartEl.setAttribute('data-chart-initialized', 'true');
-            const activeUserOptions = {
-                series: [{
-                    name: 'Active Users',
-                    data: [65, 70, 80, 85, 90, 95, 88]
-                }],
-                chart: {
-                    type: 'line',
-                    height: 50,
-                    sparkline: { enabled: true }
-                },
-                stroke: { curve: 'smooth', width: 2 },
-                colors: ['#10b981']
-            };
-            new ApexCharts(activeUserChartEl, activeUserOptions).render();
-        }
-
-        // User Growth Chart
-        const userGrowthChartEl = document.querySelector('#userGrowthChart');
-        if (userGrowthChartEl && !userGrowthChartEl.hasAttribute('data-chart-initialized')) {
-            userGrowthChartEl.setAttribute('data-chart-initialized', 'true');
-            const userGrowthOptions = {
-                series: [{
-                    name: 'New Users',
-                    data: [5, 8, 12, 15, 10, 18, 22]
-                }],
-                chart: {
-                    type: 'bar',
-                    height: 250,
-                    width: '100%',
-                    toolbar: { show: false },
-                    parentHeightOffset: 0,
-                    offsetX: 0,
-                    offsetY: 0,
-                    zoom: {
-                        enabled: false
-                    },
-                    selection: {
-                        enabled: false
-                    }
-                },
-                responsive: [{
-                    breakpoint: 768,
-                    options: {
-                        chart: {
-                            height: 200
-                        }
-                    }
-                }],
-                colors: ['#6366f1'],
-                plotOptions: {
-                    bar: {
-                        borderRadius: 4,
-                        columnWidth: '50%',
-                        barHeight: '70%',
-                        distributed: false
-                    }
-                },
-                xaxis: {
-                    categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    axisBorder: { show: false },
-                    axisTicks: { show: false },
-                    labels: {
-                        style: {
-                            fontSize: '12px',
-                            colors: '#64748b'
-                        }
-                    }
-                },
-                yaxis: { 
-                    show: false 
-                },
-                grid: { 
-                    show: false 
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                tooltip: {
-                    theme: 'light'
-                }
-            };
-            new ApexCharts(userGrowthChartEl, userGrowthOptions).render();
-        }
-
-        // Role Distribution Chart
-        const roleDistributionChartEl = document.querySelector('#roleDistributionChart');
-        if (roleDistributionChartEl && !roleDistributionChartEl.hasAttribute('data-chart-initialized')) {
-            roleDistributionChartEl.setAttribute('data-chart-initialized', 'true');
-            const roleCounts = this.users.reduce((acc, user) => {
-                acc[user.role] = (acc[user.role] || 0) + 1;
-                return acc;
-            }, {});
+    async init() {
+        console.log('🚀 Users Manager Initialized');
+        try {
+            await Promise.all([
+                this.loadSummaryData(),
+                this.loadGrowthChart(),
+                this.loadRecentActivities(),
+                this.loadUsersDirectory()
+            ]);
             
-            const roleDistributionOptions = {
-                series: Object.values(roleCounts),
-                chart: {
-                    type: 'donut',
-                    height: 140
-                },
-                labels: Object.keys(roleCounts),
-                colors: ['#6366f1', '#10b981', '#f59e0b', '#ef4444'],
-                legend: { 
-                    show: false
-                },
-                plotOptions: {
-                    pie: {
-                        donut: {
-                            size: '70%'
-                        }
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                tooltip: {
-                    theme: 'light'
-                },
-                responsive: [{
-                    breakpoint: 480,
-                    options: {
-                        chart: { width: 200 }
-                    }
-                }]
+            this.renderUI();
+            this.setupEventListeners();
+            console.log('✅ Users loaded successfully');
+        } catch (error) {
+            console.error('❌ Error loading users:', error);
+        }
+    }
+
+    async loadSummaryData() {
+        try {
+            const summary = await UsersService.getSummary();
+            this.data = { ...this.data, ...summary };
+        } catch (error) {
+            console.error('Error loading summary:', error);
+        }
+    }
+
+    async loadGrowthChart(period = '7days') {
+        try {
+            const chartData = await UsersService.getGrowthChart(period);
+            this.renderGrowthChart(chartData);
+        } catch (error) {
+            console.error('Error loading growth chart:', error);
+        }
+    }
+
+    async loadRecentActivities() {
+        try {
+            this.data.recentActivities = await UsersService.getRecentActivities(20);
+        } catch (error) {
+            console.error('Error loading activities:', error);
+        }
+    }
+
+    async loadUsersDirectory() {
+        try {
+            const params = {
+                page: this.currentPage,
+                limit: 10,
+                ...this.filters
             };
-            new ApexCharts(roleDistributionChartEl, roleDistributionOptions).render();
+            const response = await UsersService.getDirectory(params);
+            this.data.usersDirectory = response.users;
+            this.data.pagination = response.pagination;
+        } catch (error) {
+            console.error('Error loading directory:', error);
         }
     }
-  }));
 
-  // Search Component for header search
-  Alpine.data('searchComponent', () => ({
-    query: '',
-    results: [],
-    isLoading: false,
-    
-    async search() {
-      if (this.query.length < 2) {
-        this.results = [];
-        return;
-      }
-      
-      this.isLoading = true;
-      
-      // Simulate API search
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      this.results = [
-        { title: 'Dashboard', url: '/', type: 'page' },
-        { title: 'Users', url: '/users.html', type: 'page' },
-        { title: 'Settings', url: '/settings.html', type: 'page' },
-        { title: 'Analytics', url: '/analytics.html', type: 'page' },
-        { title: 'Security', url: '/security.html', type: 'page' },
-        { title: 'Help', url: '/help.html', type: 'page' }
-      ].filter(item => 
-        item.title.toLowerCase().includes(this.query.toLowerCase())
-      );
-      
-      // Also filter the user table if it exists on this page
-      const userTable = Alpine.$data(document.querySelector('[x-data="userTable"]'));
-      if (userTable) {
-        userTable.searchQuery = this.query;
-        userTable.filterUsers();
-      }
-      
-      this.isLoading = false;
+    renderUI() {
+        this.renderSummaryStats();
+        this.renderUserDistributionChart();
+        this.renderRecentActivities();
+        this.renderUsersDirectory();
     }
-  }));
 
-  // Theme Switch Component
-  Alpine.data('themeSwitch', () => ({
-    currentTheme: 'light',
-    
-    init() {
-      // Get theme from localStorage or default to light
-      this.currentTheme = localStorage.getItem('theme') || 'light';
-      this.applyTheme();
-    },
-    
-    toggle() {
-      this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-      this.applyTheme();
-      localStorage.setItem('theme', this.currentTheme);
-    },
-    
-    applyTheme() {
-      document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
+    renderSummaryStats() {
+        this.setText('total-users-count', this.data.totalUsers.toLocaleString());
+        this.setText('active-users-count', this.data.activeUsers.toLocaleString());
     }
-  }));
 
-  // User Form Component for modal
-  Alpine.data('userForm', () => ({
-    form: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      role: 'user',
-      status: 'active',
-      phone: ''
-    },
-    editingUserId: null,
-    
-    init() {
-      this.resetForm();
-    },
-    
-    resetForm() {
-      this.form = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        role: 'user',
-        status: 'active',
-        phone: ''
-      };
-      this.editingUserId = null;
-    },
-    
-    saveUser() {
-      // Validate form
-      if (!this.form.firstName || !this.form.lastName || !this.form.email) {
-        alert('Please fill in all required fields');
-        return;
-      }
-      
-      // Get the user table component
-      const userTable = Alpine.$data(document.querySelector('[x-data="userTable"]'));
-      if (!userTable) return;
-      
-      if (this.editingUserId) {
-        // Update existing user
-        const user = userTable.users.find(u => u.id === this.editingUserId);
-        if (user) {
-          user.name = `${this.form.firstName} ${this.form.lastName}`;
-          user.email = this.form.email;
-          user.role = this.form.role;
-          user.status = this.form.status;
-          user.phone = this.form.phone;
-          userTable.filterUsers();
+    renderGrowthChart(data) {
+        const chartEl = document.getElementById('userGrowthChart');
+        if (!chartEl) return;
+        if (this.charts.growth) this.charts.growth.destroy();
+
+        const options = {
+            series: [{ name: 'Người dùng mới', data: data.map(d => d.count) }],
+            chart: { type: 'bar', height: 350, toolbar: { show: false } },
+            plotOptions: {
+                bar: {
+                    borderRadius: 6,
+                    columnWidth: '60%',
+                    distributed: false
+                }
+            },
+            dataLabels: { enabled: false },
+            colors: ['#0d6efd'],
+            xaxis: {
+                categories: data.map(d => d.label),
+                labels: { 
+                    rotate: -45, 
+                    style: { fontSize: '11px', colors: '#6c757d' },
+                    trim: false
+                }
+            },
+            yaxis: {
+                labels: { 
+                    formatter: (val) => Math.round(val),
+                    style: { colors: '#6c757d' }
+                }
+            },
+            grid: { borderColor: '#e9ecef' },
+            tooltip: {
+                y: { formatter: (val) => `${val} người dùng` },
+                theme: 'dark'
+            }
+        };
+
+        this.charts.growth = new ApexCharts(chartEl, options);
+        this.charts.growth.render();
+    }
+
+    renderUserDistributionChart() {
+        const chartEl = document.getElementById('userDistributionChart');
+        if (!chartEl) return;
+        if (this.charts.distribution) this.charts.distribution.destroy();
+
+        const { users, sellers } = this.data.userDistribution;
+
+        const options = {
+            series: [users, sellers],
+            chart: { type: 'donut', height: 300 },
+            labels: ['Người dùng', 'Người bán'],
+            colors: ['#0d6efd', '#fd7e14'],
+            legend: { position: 'bottom', fontSize: '13px', labels: { colors: '#fff' } },
+            dataLabels: { 
+                enabled: true, 
+                formatter: (val) => `${val.toFixed(1)}%`,
+                style: { fontSize: '14px', fontWeight: 'bold' }
+            },
+            tooltip: {
+                y: { formatter: (val) => `${val} tài khoản` },
+                theme: 'dark'
+            },
+            plotOptions: {
+                pie: { donut: { size: '65%' } }
+            }
+        };
+
+        this.charts.distribution = new ApexCharts(chartEl, options);
+        this.charts.distribution.render();
+    }
+
+    renderRecentActivities() {
+        const container = document.getElementById('recent-activities-list');
+        if (!container) return;
+
+        if (this.data.recentActivities.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-4">Chưa có hoạt động nào</div>';
+            return;
         }
-      } else {
-        // Create new user
-        userTable.createUser(this.form);
-      }
-      
-      // Close modal and reset form
-      const modal = document.querySelector('#userModal');
-      if (modal) {
-        const bsModal = bootstrap.Modal.getInstance(modal);
-        if (bsModal) bsModal.hide();
-      }
-      
-      this.resetForm();
+
+        container.innerHTML = this.data.recentActivities.map(activity => `
+            <div class="activity-item d-flex align-items-start p-3 border-bottom">
+                <div class="activity-icon me-3">
+                    <div class="icon-circle bg-${activity.iconColor} bg-opacity-10 text-${activity.iconColor} rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-${activity.icon}"></i>
+                    </div>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="fw-bold text-white">${activity.user}</span>
+                            <span class="text-secondary ms-1">${activity.action}</span>
+                        </div>
+                        <small class="text-muted">${this.formatTime(activity.time)}</small>
+                    </div>
+                    <small class="text-muted d-block mt-1">${activity.details}</small>
+                </div>
+            </div>
+        `).join('');
     }
-  }));
-}); 
+
+    renderUsersDirectory() {
+        const tbody = document.getElementById('users-directory-tbody');
+        if (!tbody) return;
+
+        if (this.data.usersDirectory.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">Không tìm thấy người dùng nào</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = this.data.usersDirectory.map(user => `
+            <tr class="${this.selectedUsers.has(user._id) ? 'table-active' : ''}">
+                <td>
+                    <input type="checkbox" 
+                           class="form-check-input user-checkbox" 
+                           value="${user._id}"
+                           ${this.selectedUsers.has(user._id) ? 'checked' : ''}>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <img src="${user.avatar || '/assets/icons/icon-192.png'}" 
+                             class="rounded-circle me-2" 
+                             width="32" height="32" 
+                             alt="${user.name}">
+                        <div>
+                            <div class="fw-medium text-white">${user.name || user.email}</div>
+                            <small class="text-muted">${user.email}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge ${this.getRoleBadgeClass(user)}">
+                        ${this.getRoleText(user)}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge ${user.role === 'admin' ? 'bg-danger' : 'bg-success'}">
+                        ${user.role === 'admin' ? 'Admin' : 'Active'}
+                    </span>
+                </td>
+                <td class="text-secondary">${new Date(user.updatedAt).toLocaleDateString('vi-VN')}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                type="button" 
+                                data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-eye me-2"></i>View</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="window.usersManager.deleteUser('${user._id}')">
+                                <i class="bi bi-trash me-2"></i>Delete
+                            </a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        this.renderPagination();
+    }
+
+    renderPagination() {
+        const paginationInfo = document.getElementById('pagination-info');
+        const paginationNav = document.getElementById('pagination-nav');
+        
+        if (!this.data.pagination) return;
+
+        const { page, limit, total, pages } = this.data.pagination;
+        const start = (page - 1) * limit + 1;
+        const end = Math.min(page * limit, total);
+
+        if (paginationInfo) {
+            paginationInfo.textContent = `Showing ${start} to ${end} of ${total} results`;
+        }
+
+        if (paginationNav) {
+            let html = `
+                <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${page - 1}">Previous</a>
+                </li>
+            `;
+
+            for (let i = 1; i <= pages; i++) {
+                html += `
+                    <li class="page-item ${i === page ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `;
+            }
+
+            html += `
+                <li class="page-item ${page === pages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${page + 1}">Next</a>
+                </li>
+            `;
+
+            paginationNav.innerHTML = html;
+
+            // ✅ Thêm event listeners cho pagination
+            paginationNav.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetPage = parseInt(e.target.dataset.page);
+                    if (!isNaN(targetPage)) {
+                        this.goToPage(targetPage);
+                    }
+                });
+            });
+        }
+    }
+
+    async goToPage(page) {
+        if (!this.data.pagination) return;
+        if (page < 1 || page > this.data.pagination.pages) return;
+        
+        console.log('📄 Going to page:', page);
+        
+        this.currentPage = page;
+        await this.loadUsersDirectory();
+        this.renderUsersDirectory();
+        
+        // Scroll to top of table
+        document.getElementById('users-directory-tbody')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    setupEventListeners() {
+        // Period filter
+        document.querySelectorAll('[data-period]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentPeriod = e.target.dataset.period;
+                this.loadGrowthChart(this.currentPeriod);
+            });
+        });
+
+        // Search
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.filters.search = e.target.value;
+                this.currentPage = 1;
+                this.loadUsersDirectory().then(() => this.renderUsersDirectory());
+            });
+        }
+
+        // Status filter
+        const statusFilter = document.getElementById('status-filter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', (e) => {
+                this.filters.status = e.target.value;
+                this.currentPage = 1;
+                this.loadUsersDirectory().then(() => this.renderUsersDirectory());
+            });
+        }
+
+        // Role filter
+        const roleFilter = document.getElementById('role-filter');
+        if (roleFilter) {
+            roleFilter.addEventListener('change', (e) => {
+                this.filters.role = e.target.value;
+                this.currentPage = 1;
+                this.loadUsersDirectory().then(() => this.renderUsersDirectory());
+            });
+        }
+
+        // Checkbox selection
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('user-checkbox')) {
+                const userId = e.target.value;
+                if (e.target.checked) {
+                    this.selectedUsers.add(userId);
+                } else {
+                    this.selectedUsers.delete(userId);
+                }
+                this.updateBulkActions();
+            }
+
+            // Select all
+            if (e.target.id === 'select-all-checkbox') {
+                const isChecked = e.target.checked;
+                this.data.usersDirectory.forEach(user => {
+                    if (isChecked) {
+                        this.selectedUsers.add(user._id);
+                    } else {
+                        this.selectedUsers.delete(user._id);
+                    }
+                });
+                this.updateBulkActions();
+                this.renderUsersDirectory();
+            }
+        });
+
+        // Bulk actions
+        document.getElementById('bulk-activate-btn')?.addEventListener('click', () => this.bulkAction('activate'));
+        document.getElementById('bulk-deactivate-btn')?.addEventListener('click', () => this.bulkAction('deactivate'));
+        document.getElementById('bulk-delete-btn')?.addEventListener('click', () => this.bulkAction('delete'));
+        document.getElementById('clear-selection-btn')?.addEventListener('click', () => {
+            this.selectedUsers.clear();
+            this.updateBulkActions();
+            this.renderUsersDirectory();
+        });
+    }
+
+    updateBulkActions() {
+        const bulkBar = document.getElementById('bulk-actions-bar');
+        const selectedCount = document.getElementById('selected-count');
+        
+        if (bulkBar && selectedCount) {
+            if (this.selectedUsers.size > 0) {
+                bulkBar.classList.remove('d-none');
+                selectedCount.textContent = this.selectedUsers.size;
+            } else {
+                bulkBar.classList.add('d-none');
+            }
+        }
+    }
+
+    async bulkAction(action) {
+        if (this.selectedUsers.size === 0) return;
+        
+        const actionText = { activate: 'kích hoạt', deactivate: 'vô hiệu hóa', delete: 'xóa' }[action];
+        if (!confirm(`Bạn có chắc muốn ${actionText} ${this.selectedUsers.size} tài khoản?`)) return;
+
+        try {
+            const userIds = Array.from(this.selectedUsers);
+            await UsersService.bulkAction(action, userIds);
+            alert(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)} thành công!`);
+            this.selectedUsers.clear();
+            await this.loadUsersDirectory();
+            this.renderUsersDirectory();
+            this.updateBulkActions();
+        } catch (error) {
+            console.error('Error bulk action:', error);
+            alert('Có lỗi xảy ra!');
+        }
+    }
+
+    async deleteUser(userId) {
+        if (!confirm('Bạn có chắc muốn xóa tài khoản này?')) return;
+        
+        try {
+            await UsersService.bulkAction('delete', [userId]);
+            alert('Xóa thành công!');
+            await this.loadUsersDirectory();
+            this.renderUsersDirectory();
+        } catch (error) {
+            console.error('Error delete user:', error);
+            alert('Có lỗi xảy ra!');
+        }
+    }
+
+    async goToPage(page) {
+        if (!this.data.pagination) return;
+        if (page < 1 || page > this.data.pagination.pages) return;
+        
+        this.currentPage = page;
+        await this.loadUsersDirectory();
+        this.renderUsersDirectory();
+    }
+
+    // Utilities
+    getRoleBadgeClass(user) {
+        if (user.isSeller) return 'bg-warning text-dark';
+        return user.role === 'admin' ? 'bg-danger' : 'bg-primary';
+    }
+
+    getRoleText(user) {
+        if (user.isSeller) return 'Seller';
+        return user.role === 'admin' ? 'Admin' : 'User';
+    }
+
+    setText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+    }
+
+    formatTime(date) {
+        const diff = Date.now() - new Date(date).getTime();
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        
+        if (minutes < 60) return `${minutes} phút trước`;
+        if (hours < 24) return `${hours} giờ trước`;
+        return `${days} ngày trước`;
+    }
+}
+
+// Export global instance
+if (typeof window !== 'undefined') {
+    window.UsersManager = UsersManager;
+}

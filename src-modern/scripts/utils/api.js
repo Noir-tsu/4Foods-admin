@@ -17,5 +17,12 @@ export const ENDPOINTS = {
     ANALYTICS: {
         SUMMARY: '/analytics/summary',
         REVENUE_DAILY: '/analytics/revenue-daily'
+    },
+    USERS: {
+        SUMMARY: '/users/summary',
+        GROWTH_CHART: '/users/growth-chart',
+        RECENT_ACTIVITIES: '/users/recent-activities',
+        DIRECTORY: '/users/directory',
+        BULK_ACTION: '/users/bulk-action' 
     }
 };

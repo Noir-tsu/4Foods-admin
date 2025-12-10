@@ -21,7 +21,8 @@ import {
 
 // Import our custom modules
 import { ThemeManager } from './utils/theme-manager.js';
-import { AnalyticsManager } from './components/analytics.js'; 
+import { UsersManager } from './components/users.js';
+import { AnalyticsManager } from './components/analytics.js';
 import { DashboardManager } from './components/dashboard.js';
 import { NotificationManager } from './utils/notifications.js';
 import { iconManager } from './utils/icon-manager.js';
@@ -207,21 +208,13 @@ class AdminApp {
   }
 
   async initUsersPage() {
-    try {
-      await import('./components/users.js');
-      console.log('👥 Users page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load users page script:', error);
-    }
+    console.log('🏗️ Initializing Users Page...');
+    this.components.set('users', new UsersManager());
   }
 
   async initAnalyticsPage() {
-    try {
-      await import('./components/analytics.js');
-      console.log('📊 Analytics page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load analytics page script:', error);
-    }
+    console.log('🏗️ Initializing Analytics Page...');
+    this.components.set('analytics', new AnalyticsManager());
   }
 
   async initProductsPage() {
