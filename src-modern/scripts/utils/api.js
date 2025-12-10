@@ -24,5 +24,15 @@ export const ENDPOINTS = {
         RECENT_ACTIVITIES: '/users/recent-activities',
         DIRECTORY: '/users/directory',
         BULK_ACTION: '/users/bulk-action' 
+    },
+    PRODUCTS: {
+        SUMMARY: '/products/summary',
+        CATEGORY_SALES_TIMELINE: '/products/category-sales-timeline',
+        TOP_SELLING: '/products/top-selling',
+        CATEGORIES: '/products/categories',
+        CATEGORY_DISTRIBUTION: '/products/category-distribution',
+        LIST: '/products/list',
+        BULK_ACTION: '/products/bulk-action',
+        DELETE: '/products'
     }
 };

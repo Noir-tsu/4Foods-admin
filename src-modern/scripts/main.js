@@ -21,6 +21,7 @@ import {
 
 // Import our custom modules
 import { ThemeManager } from './utils/theme-manager.js';
+import { ProductsManager } from './components/products.js';
 import { UsersManager } from './components/users.js';
 import { AnalyticsManager } from './components/analytics.js';
 import { DashboardManager } from './components/dashboard.js';
@@ -218,12 +219,8 @@ class AdminApp {
   }
 
   async initProductsPage() {
-    try {
-      await import('./components/products.js');
-      console.log('📦 Products page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load products page script:', error);
-    }
+        console.log('🏗️ Initializing Products Page...');
+        this.components.set('products', new ProductsManager());
   }
 
   async initOrdersPage() {

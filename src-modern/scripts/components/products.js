@@ -1,787 +1,653 @@
-import Alpine from 'alpinejs';
+// src-modern/scripts/components/products.js
+import ApexCharts from 'apexcharts';
+import { ProductsService } from '../utils/services/products.service.js';
 
-document.addEventListener('alpine:init', () => {
-  Alpine.data('productTable', () => ({
-    products: [],
-    filteredProducts: [],
-    selectedProducts: [],
-    currentPage: 1,
-    itemsPerPage: 10,
-    searchQuery: '',
-    categoryFilter: '',
-    stockFilter: '',
-    sortField: 'name',
-    sortDirection: 'asc',
-    isLoading: false,
-    chartsInitialized: false,
-
-    // Statistics
-    stats: {
-      total: 0,
-      inStock: 0,
-      lowStock: 0,
-      totalValue: 0
-    },
-
-    categoryStats: [],
-
-    init() {
-      this.loadSampleData();
-      this.filterProducts();
-      this.calculateStats();
-      
-      // Delay chart initialization to ensure DOM is fully ready
-      setTimeout(() => {
-        this.initCharts();
-      }, 500);
-    },
-
-    loadSampleData() {
-      this.products = [
-        {
-          id: 1,
-          name: 'iPhone 14 Pro',
-          sku: 'IPHONE14-PRO-128',
-          category: 'electronics',
-          price: 999.99,
-          stock: 45,
-          status: 'published',
-          created: '2024-01-15',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Latest iPhone with advanced camera system'
-        },
-        {
-          id: 2,
-          name: 'MacBook Air M2',
-          sku: 'MBA-M2-256',
-          category: 'electronics',
-          price: 1199.99,
-          stock: 23,
-          status: 'published',
-          created: '2024-01-20',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Lightweight laptop with M2 chip'
-        },
-        {
-          id: 3,
-          name: 'Cotton T-Shirt',
-          sku: 'TSHIRT-COT-M',
-          category: 'clothing',
-          price: 24.99,
-          stock: 156,
-          status: 'published',
-          created: '2024-02-01',
-          image: '/assets/images/product-placeholder.svg',
-          description: '100% organic cotton t-shirt'
-        },
-        {
-          id: 4,
-          name: 'JavaScript Guide',
-          sku: 'BOOK-JS-2024',
-          category: 'books',
-          price: 39.99,
-          stock: 8,
-          status: 'published',
-          created: '2024-02-10',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Complete JavaScript programming guide'
-        },
-        {
-          id: 5,
-          name: 'Garden Tool Set',
-          sku: 'GARDEN-TOOLS-SET',
-          category: 'home',
-          price: 89.99,
-          stock: 0,
-          status: 'published',
-          created: '2024-02-15',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Professional garden tool kit'
-        },
-        {
-          id: 6,
-          name: 'Wireless Headphones',
-          sku: 'HEADPHONES-WL-BT',
-          category: 'electronics',
-          price: 149.99,
-          stock: 67,
-          status: 'published',
-          created: '2024-02-20',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Noise-cancelling wireless headphones'
-        },
-        {
-          id: 7,
-          name: 'Denim Jeans',
-          sku: 'JEANS-DENIM-32',
-          category: 'clothing',
-          price: 79.99,
-          stock: 34,
-          status: 'draft',
-          created: '2024-02-25',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Classic fit denim jeans'
-        },
-        {
-          id: 8,
-          name: 'Python Cookbook',
-          sku: 'BOOK-PY-COOK',
-          category: 'books',
-          price: 44.99,
-          stock: 15,
-          status: 'published',
-          created: '2024-03-01',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Advanced Python programming techniques'
-        },
-        {
-          id: 9,
-          name: 'Smart Home Hub',
-          sku: 'SMARTHUB-V2',
-          category: 'electronics',
-          price: 199.99,
-          stock: 12,
-          status: 'published',
-          created: '2024-03-05',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Central hub for smart home devices'
-        },
-        {
-          id: 10,
-          name: 'Kitchen Knife Set',
-          sku: 'KITCHEN-KNIVES-PRO',
-          category: 'home',
-          price: 129.99,
-          stock: 28,
-          status: 'pending',
-          created: '2024-03-10',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Professional chef knife collection'
-        },
-        {
-          id: 11,
-          name: 'Samsung Galaxy S24',
-          sku: 'GALAXY-S24-256',
-          category: 'electronics',
-          price: 899.99,
-          stock: 67,
-          status: 'published',
-          created: '2024-03-12',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Latest Samsung flagship smartphone'
-        },
-        {
-          id: 12,
-          name: 'Yoga Mat Premium',
-          sku: 'YOGA-MAT-PREM',
-          category: 'home',
-          price: 49.99,
-          stock: 156,
-          status: 'published',
-          created: '2024-03-14',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Non-slip premium yoga mat'
-        },
-        {
-          id: 13,
-          name: 'React Handbook',
-          sku: 'BOOK-REACT-2024',
-          category: 'books',
-          price: 54.99,
-          stock: 23,
-          status: 'published',
-          created: '2024-03-16',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Complete React development guide'
-        },
-        {
-          id: 14,
-          name: 'Winter Jacket',
-          sku: 'JACKET-WINTER-L',
-          category: 'clothing',
-          price: 189.99,
-          stock: 12,
-          status: 'published',
-          created: '2024-03-18',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Waterproof winter jacket'
-        },
-        {
-          id: 15,
-          name: 'Gaming Mouse RGB',
-          sku: 'MOUSE-GAMING-RGB',
-          category: 'electronics',
-          price: 79.99,
-          stock: 89,
-          status: 'published',
-          created: '2024-03-20',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'High-precision gaming mouse'
-        },
-        {
-          id: 16,
-          name: 'Coffee Maker Deluxe',
-          sku: 'COFFEE-MAKER-DLX',
-          category: 'home',
-          price: 249.99,
-          stock: 34,
-          status: 'published',
-          created: '2024-03-22',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Programmable drip coffee maker'
-        },
-        {
-          id: 17,
-          name: 'Node.js Complete Guide',
-          sku: 'BOOK-NODEJS-COMP',
-          category: 'books',
-          price: 59.99,
-          stock: 18,
-          status: 'published',
-          created: '2024-03-24',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Master Node.js development'
-        },
-        {
-          id: 18,
-          name: 'Running Shoes',
-          sku: 'SHOES-RUN-42',
-          category: 'clothing',
-          price: 129.99,
-          stock: 0,
-          status: 'published',
-          created: '2024-03-26',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Lightweight running shoes'
-        },
-        {
-          id: 19,
-          name: 'Tablet Pro 12.9"',
-          sku: 'TABLET-PRO-129',
-          category: 'electronics',
-          price: 1099.99,
-          stock: 15,
-          status: 'published',
-          created: '2024-03-28',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Professional tablet with stylus'
-        },
-        {
-          id: 20,
-          name: 'Garden Planter Set',
-          sku: 'PLANTER-SET-3PC',
-          category: 'home',
-          price: 89.99,
-          stock: 45,
-          status: 'published',
-          created: '2024-03-30',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Set of 3 ceramic planters'
-        },
-        {
-          id: 21,
-          name: 'Docker Deep Dive',
-          sku: 'BOOK-DOCKER-DD',
-          category: 'books',
-          price: 49.99,
-          stock: 31,
-          status: 'published',
-          created: '2024-04-01',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Container technology mastery'
-        },
-        {
-          id: 22,
-          name: 'Casual Polo Shirt',
-          sku: 'POLO-CASUAL-M',
-          category: 'clothing',
-          price: 39.99,
-          stock: 78,
-          status: 'published',
-          created: '2024-04-03',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Premium cotton polo shirt'
-        },
-        {
-          id: 23,
-          name: 'Mechanical Keyboard',
-          sku: 'KEYBOARD-MECH-TKL',
-          category: 'electronics',
-          price: 159.99,
-          stock: 24,
-          status: 'published',
-          created: '2024-04-05',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Tenkeyless mechanical keyboard'
-        },
-        {
-          id: 24,
-          name: 'Desk Organizer',
-          sku: 'DESK-ORG-BAMBOO',
-          category: 'home',
-          price: 34.99,
-          stock: 62,
-          status: 'published',
-          created: '2024-04-07',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Bamboo desk organizer'
-        },
-        {
-          id: 25,
-          name: 'AI & Machine Learning',
-          sku: 'BOOK-AI-ML-2024',
-          category: 'books',
-          price: 79.99,
-          stock: 14,
-          status: 'published',
-          created: '2024-04-09',
-          image: '/assets/images/product-placeholder.svg',
-          description: 'Introduction to AI and ML'
-        }
-      ];
-    },
-
-    calculateStats() {
-      this.stats.total = this.products.length;
-      this.stats.inStock = this.products.filter(p => p.stock > 20).length;
-      this.stats.lowStock = this.products.filter(p => p.stock > 0 && p.stock <= 20).length;
-      this.stats.totalValue = this.products.reduce((sum, p) => sum + (p.price * p.stock), 0);
-
-      // Calculate category distribution
-      const categories = {};
-      this.products.forEach(product => {
-        categories[product.category] = (categories[product.category] || 0) + 1;
-      });
-
-      this.categoryStats = Object.entries(categories).map(([name, count]) => ({
-        name: name.charAt(0).toUpperCase() + name.slice(1),
-        count,
-        percentage: Math.round((count / this.products.length) * 100),
-        color: this.getCategoryColor(name)
-      }));
-    },
-
-    getCategoryColor(category) {
-      const colors = {
-        electronics: '#6366f1',
-        clothing: '#8b5cf6',
-        books: '#06b6d4',
-        home: '#10b981'
-      };
-      return colors[category] || '#6b7280';
-    },
-
-    filterProducts() {
-      this.filteredProducts = this.products.filter(product => {
-        const matchesSearch = !this.searchQuery || 
-          product.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          product.sku.toLowerCase().includes(this.searchQuery.toLowerCase());
+export class ProductsManager {
+    constructor() {
+        this.charts = {};
+        this.data = {
+            totalProducts: 0,
+            totalValue: 0,
+            statusStats: {},
+            categorySalesTimeline: { series: [], labels: [] },
+            topSelling: [],
+            categories: [],
+            categoryDistribution: [],
+            productsList: [],
+            pagination: null
+        };
+        this.selectedProducts = new Set();
+        this.filters = {
+            search: '',
+            category: '',
+            status: '',
+            minPrice: '',
+            maxPrice: ''
+        };
+        this.currentPage = 1;
         
-        const matchesCategory = !this.categoryFilter || product.category === this.categoryFilter;
+        window.productsManager = this;
         
-        const matchesStock = !this.stockFilter || 
-          (this.stockFilter === 'in-stock' && product.stock > 20) ||
-          (this.stockFilter === 'low-stock' && product.stock > 0 && product.stock <= 20) ||
-          (this.stockFilter === 'out-of-stock' && product.stock === 0);
-
-        return matchesSearch && matchesCategory && matchesStock;
-      });
-
-      this.sortProducts();
-      this.currentPage = 1;
-    },
-
-    sortProducts() {
-      this.filteredProducts.sort((a, b) => {
-        let aVal = a[this.sortField];
-        let bVal = b[this.sortField];
-
-        if (this.sortField === 'price' || this.sortField === 'stock') {
-          aVal = parseFloat(aVal);
-          bVal = parseFloat(bVal);
-        } else if (this.sortField === 'created') {
-          aVal = new Date(aVal);
-          bVal = new Date(bVal);
-        } else {
-          aVal = aVal.toString().toLowerCase();
-          bVal = bVal.toString().toLowerCase();
+        if (document.getElementById('total-products-count')) {
+            this.init();
         }
+    }
 
-        if (this.sortDirection === 'asc') {
-          return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-        } else {
-          return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+    async init() {
+        console.log('🚀 Products Manager Initialized');
+        
+        try {
+            await Promise.all([
+                this.loadSummary().catch(e => console.error('Summary error:', e)),
+                this.loadCategorySalesTimeline().catch(e => console.error('Timeline error:', e)),
+                this.loadTopSelling().catch(e => console.error('Top selling error:', e)),
+                this.loadCategories().catch(e => console.error('Categories error:', e)),
+                this.loadCategoryDistribution().catch(e => console.error('Distribution error:', e)),
+                this.loadProductsList().catch(e => console.error('Products list error:', e))
+            ]);
+            
+            await this.$nextTick();
+            this.renderUI();
+            this.setupEventListeners();
+            
+            console.log('✅ Products page loaded successfully');
+            
+        } catch (error) {
+            console.error('❌ Fatal error loading products:', error);
         }
-      });
-    },
+    }
 
-    sortBy(field) {
-      if (this.sortField === field) {
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-      } else {
-        this.sortField = field;
-        this.sortDirection = 'asc';
-      }
-      this.filterProducts();
-    },
+    $nextTick() {
+        return new Promise(resolve => setTimeout(resolve, 100));
+    }
 
-    toggleAll(checked) {
-      if (checked) {
-        this.selectedProducts = this.paginatedProducts.map(p => p.id);
-      } else {
-        this.selectedProducts = [];
-      }
-    },
+    async loadSummary() {
+        try {
+            const summary = await ProductsService.getSummary();
+            this.data = { ...this.data, ...summary };
+        } catch (error) {
+            console.error('Error loading summary:', error);
+        }
+    }
 
-    bulkAction(action) {
-      if (this.selectedProducts.length === 0) return;
+    async loadCategorySalesTimeline() {
+        try {
+            this.data.categorySalesTimeline = await ProductsService.getCategorySalesTimeline();
+        } catch (error) {
+            console.error('Error loading category sales timeline:', error);
+        }
+    }
 
-      const selectedProductObjects = this.products.filter(p => 
-        this.selectedProducts.includes(p.id)
-      );
+    async loadTopSelling() {
+        try {
+            this.data.topSelling = await ProductsService.getTopSelling();
+        } catch (error) {
+            console.error('Error loading top selling:', error);
+        }
+    }
 
-      switch (action) {
-        case 'publish':
-          selectedProductObjects.forEach(product => {
-            product.status = 'published';
-          });
-          this.showNotification('Products published successfully!', 'success');
-          break;
-        case 'unpublish':
-          selectedProductObjects.forEach(product => {
-            product.status = 'draft';
-          });
-          this.showNotification('Products unpublished successfully!', 'info');
-          break;
-        case 'delete':
-          if (confirm(`Are you sure you want to delete ${this.selectedProducts.length} product(s)?`)) {
-            this.products = this.products.filter(p => 
-              !this.selectedProducts.includes(p.id)
-            );
-            this.filterProducts();
-            this.calculateStats();
-            this.showNotification('Products deleted successfully!', 'success');
+    async loadCategories() {
+      try {
+          console.log('🔄 Loading categories...');
+          this.data.categories = await ProductsService.getCategories();
+          console.log('✅ Categories loaded:', this.data.categories);
+          
+          if (!this.data.categories || this.data.categories.length === 0) {
+              console.warn('⚠️ No categories data received');
           }
-          break;
+      } catch (error) {
+          console.error('❌ Error loading categories:', error);
+          this.data.categories = [];
       }
+    }
 
-      this.selectedProducts = [];
-    },
+    async loadCategoryDistribution() {
+        try {
+            this.data.categoryDistribution = await ProductsService.getCategoryDistribution();
+        } catch (error) {
+            console.error('Error loading category distribution:', error);
+        }
+    }
 
-    editProduct(product) {
-      console.log('Edit product:', product);
-      this.showNotification('Edit functionality would open here', 'info');
-    },
+    async loadProductsList() {
+        try {
+            const params = {
+                page: this.currentPage,
+                limit: 10,
+                ...this.filters
+            };
+            const response = await ProductsService.getProductsList(params);
+            this.data.productsList = response.products;
+            this.data.pagination = response.pagination;
+        } catch (error) {
+            console.error('Error loading products list:', error);
+        }
+    }
 
-    viewProduct(product) {
-      console.log('View product:', product);
-      this.showNotification('Product details would open here', 'info');
-    },
+    renderUI() {
+        this.renderSummaryStats();
+        this.renderCategorySalesTimelineChart();
+        this.renderTopSelling();
+        this.renderCategories();
+        this.renderCategoryDistributionChart();
+        this.renderProductsList();
+        this.populateCategoryFilter();
+    }
 
-    duplicateProduct(product) {
-      const newProduct = {
-        ...product,
-        id: Math.max(...this.products.map(p => p.id)) + 1,
-        name: product.name + ' (Copy)',
-        sku: product.sku + '-COPY',
-        status: 'draft',
-        created: new Date().toISOString().split('T')[0]
-      };
-      this.products.unshift(newProduct);
-      this.filterProducts();
-      this.calculateStats();
-      this.showNotification('Product duplicated successfully!', 'success');
-    },
+    renderSummaryStats() {
+        this.setText('total-products-count', this.data.totalProducts.toLocaleString());
+        this.setText('total-value-amount', `${this.data.totalValue.toLocaleString('vi-VN')}đ`);
+    }
 
-    deleteProduct(product) {
-      if (confirm(`Are you sure you want to delete "${product.name}"?`)) {
-        this.products = this.products.filter(p => p.id !== product.id);
-        this.filterProducts();
-        this.calculateStats();
-        this.showNotification('Product deleted successfully!', 'success');
-      }
-    },
+    renderCategorySalesTimelineChart() {
+        const chartEl = document.getElementById('categorySalesChart');
+        if (!chartEl) return;
+        if (this.charts.categorySales) this.charts.categorySales.destroy();
 
-    exportProducts() {
-      const csvContent = "data:text/csv;charset=utf-8," + 
-        "Name,SKU,Category,Price,Stock,Status,Created\n" +
-        this.filteredProducts.map(p => 
-          `"${p.name}","${p.sku}","${p.category}","${p.price}","${p.stock}","${p.status}","${p.created}"`
-        ).join("\n");
+        const { series, labels } = this.data.categorySalesTimeline;
 
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "products.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      this.showNotification('Products exported successfully!', 'success');
-    },
+        if (!series || series.length === 0) {
+            chartEl.innerHTML = '<div class="text-center text-muted py-5">Chưa có dữ liệu</div>';
+            return;
+        }
 
-    showNotification(message, type = 'info') {
-      // Integration with SweetAlert2 or browser notification
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          title: message,
-          icon: type === 'success' ? 'success' : type === 'error' ? 'error' : 'info',
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 3000
+        const options = {
+            series: series,
+            chart: {
+                type: 'line',
+                height: 350,
+                toolbar: { show: false },
+                background: 'transparent'
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            colors: ['#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545', '#fd7e14', '#ffc107', '#198754'],
+            dataLabels: { enabled: false },
+            xaxis: {
+                categories: labels,
+                labels: {
+                    style: { colors: '#6c757d' }
+                }
+            },
+            yaxis: {
+                labels: {
+                    formatter: (val) => val > 1000 ? `${(val / 1000).toFixed(0)}K` : val,
+                    style: { colors: '#6c757d' }
+                }
+            },
+            grid: { borderColor: '#2d3748' },
+            legend: {
+                position: 'top',
+                labels: { colors: '#fff' }
+            },
+            tooltip: {
+                y: {
+                    formatter: (val) => `${val.toLocaleString('vi-VN')}đ`
+                },
+                theme: 'dark'
+            }
+        };
+
+        this.charts.categorySales = new ApexCharts(chartEl, options);
+        this.charts.categorySales.render();
+    }
+
+    renderTopSelling() {
+        const container = document.getElementById('top-selling-list');
+        if (!container) return;
+
+        if (this.data.topSelling.length === 0) {
+            container.innerHTML = '<div class="text-center text-muted py-4">Chưa có dữ liệu</div>';
+            return;
+        }
+
+        container.innerHTML = this.data.topSelling.map((product, index) => `
+            <div class="d-flex align-items-center p-3 border-bottom border-secondary">
+                <div class="me-3">
+                    <span class="badge ${index === 0 ? 'bg-warning' : index === 1 ? 'bg-secondary' : 'bg-info'} rounded-pill fs-5">
+                        ${index + 1}
+                    </span>
+                </div>
+                <img src="${product.imageUrl}" 
+                     class="rounded me-3" 
+                     width="60" 
+                     height="60" 
+                     style="object-fit: cover;"
+                     alt="${product.name}"
+                     onerror="this.src='/assets/icons/icon-192.png'">
+                <div class="flex-grow-1">
+                    <div class="fw-medium text-white">${product.name}</div>
+                    <small class="text-muted">${product.category}</small>
+                    <div class="d-flex align-items-center mt-1">
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <span class="text-white me-3">${product.rating.toFixed(1)}</span>
+                        <span class="text-primary fw-bold">${product.price.toLocaleString('vi-VN')}đ</span>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="text-success fw-bold">${product.ordersCount}</div>
+                    <small class="text-muted">đơn hàng</small>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderCategories() {
+        const container = document.getElementById('categories-list');
+        
+        console.log('🎨 Rendering categories, container found:', !!container);
+        console.log('📦 Categories data:', this.data.categories);
+        
+        if (!container) {
+            console.error('❌ Container #categories-list not found!');
+            return;
+        }
+
+        if (!this.data.categories || this.data.categories.length === 0) {
+            console.warn('⚠️ No categories to render');
+            container.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                    <p class="mb-0">Chưa có category nào trong database</p>
+                    <small class="text-secondary">Hãy thêm sản phẩm với category để hiển thị</small>
+                </div>
+            `;
+            return;
+        }
+
+        console.log('✅ Rendering', this.data.categories.length, 'categories');
+
+        container.innerHTML = this.data.categories.map((cat, index) => {
+            console.log(`Rendering category ${index}:`, cat.category, 'with', cat.products?.length || 0, 'products');
+            
+            return `
+                <div class="card bg-dark border-secondary mb-2">
+                    <div class="card-header p-0">
+                        <button class="btn btn-link text-decoration-none text-white w-100 text-start p-3 d-flex justify-content-between align-items-center" 
+                                type="button" 
+                                data-bs-toggle="collapse" 
+                                data-bs-target="#collapse-${index}"
+                                aria-expanded="false"
+                                aria-controls="collapse-${index}">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-tag-fill me-2 text-primary"></i>
+                                <strong>${cat.category}</strong>
+                            </div>
+                            <div>
+                                <span class="badge bg-primary me-2">${cat.count} SP</span>
+                                <span class="text-success small">${(cat.totalValue || 0).toLocaleString('vi-VN')}đ</span>
+                                <i class="bi bi-chevron-down ms-2"></i>
+                            </div>
+                        </button>
+                    </div>
+                    <div id="collapse-${index}" class="collapse">
+                        <div class="card-body bg-secondary p-3">
+                            ${cat.products && cat.products.length > 0 ? `
+                                <div class="row g-2">
+                                    ${cat.products.map(product => `
+                                        <div class="col-md-6">
+                                            <div class="card bg-dark border-0">
+                                                <div class="card-body p-2">
+                                                    <div class="d-flex">
+                                                        <img src="${product.imageUrl}" 
+                                                            class="rounded me-2" 
+                                                            width="50" 
+                                                            height="50" 
+                                                            style="object-fit: cover;"
+                                                            alt="${product.name}"
+                                                            onerror="this.src='/assets/icons/icon-192.png'">
+                                                        <div class="flex-grow-1">
+                                                            <div class="fw-medium text-white small text-truncate">${product.name}</div>
+                                                            <div class="text-primary fw-bold small">${(product.price || 0).toLocaleString('vi-VN')}đ</div>
+                                                            <small class="text-muted">Stock: ${product.stock || 0}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <div class="text-center text-muted py-3">
+                                    <small>Không có sản phẩm nào</small>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        console.log('✅ Categories rendered successfully');
+    }
+
+    renderCategoryDistributionChart() {
+        const chartEl = document.getElementById('categoryDistributionChart');
+        if (!chartEl) return;
+        if (this.charts.distribution) this.charts.distribution.destroy();
+
+        if (this.data.categoryDistribution.length === 0) {
+            chartEl.innerHTML = '<div class="text-center text-muted py-5">Chưa có dữ liệu</div>';
+            return;
+        }
+
+        const labels = this.data.categoryDistribution.map(d => d.category);
+        const series = this.data.categoryDistribution.map(d => d.count);
+
+        const options = {
+            series: series,
+            chart: { type: 'donut', height: 300, background: 'transparent' },
+            labels: labels,
+            colors: ['#0d6efd', '#6610f2', '#6f42c1', '#d63384', '#dc3545', '#fd7e14', '#ffc107', '#198754', '#20c997', '#0dcaf0'],
+            legend: {
+                position: 'bottom',
+                fontSize: '12px',
+                labels: { colors: '#fff' }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: (val) => `${val.toFixed(1)}%`,
+                style: { fontSize: '12px', fontWeight: 'bold', colors: ['#fff'] }
+            },
+            tooltip: {
+                y: { formatter: (val) => `${val} sản phẩm` },
+                theme: 'dark'
+            },
+            plotOptions: {
+                pie: { donut: { size: '65%' } }
+            }
+        };
+
+        this.charts.distribution = new ApexCharts(chartEl, options);
+        this.charts.distribution.render();
+    }
+
+    renderProductsList() {
+        const tbody = document.getElementById('products-list-tbody');
+        if (!tbody) return;
+
+        if (this.data.productsList.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">Không tìm thấy sản phẩm nào</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = this.data.productsList.map(product => `
+            <tr class="${this.selectedProducts.has(product._id) ? 'table-active' : ''}">
+                <td>
+                    <input type="checkbox" 
+                           class="form-check-input product-checkbox" 
+                           value="${product._id}"
+                           ${this.selectedProducts.has(product._id) ? 'checked' : ''}>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <img src="${product.imageUrl}" 
+                             class="rounded me-2" 
+                             width="40" 
+                             height="40" 
+                             style="object-fit: cover;"
+                             alt="${product.name}"
+                             onerror="this.src='/assets/icons/icon-192.png'">
+                        <div>
+                            <div class="fw-medium text-white small">${product.name}</div>
+                            <small class="text-muted">${product.category}</small>
+                        </div>
+                    </div>
+                </td>
+                <td class="text-white">${product.price.toLocaleString('vi-VN')}đ</td>
+                <td class="text-center text-white">${product.stock}</td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-star-fill text-warning me-1"></i>
+                        <span class="text-white">${product.rating.toFixed(1)}</span>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge ${this.getStatusBadgeClass(product.status)}">
+                        ${this.getStatusText(product.status)}
+                    </span>
+                </td>
+                <td class="text-center text-secondary">${product.views || 0}</td>
+                <td class="text-center text-secondary">${product.ordersCount || 0}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                type="button" 
+                                data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-pencil me-2"></i>Edit</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-eye me-2"></i>View</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="window.productsManager.deleteProduct('${product._id}'); return false;">
+                                <i class="bi bi-trash me-2"></i>Delete
+                            </a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        this.renderPagination();
+    }
+
+    renderPagination() {
+        const paginationInfo = document.getElementById('pagination-info');
+        const paginationNav = document.getElementById('pagination-nav');
+        
+        if (!this.data.pagination) return;
+
+        const { page, limit, total, pages } = this.data.pagination;
+        const start = (page - 1) * limit + 1;
+        const end = Math.min(page * limit, total);
+
+        if (paginationInfo) {
+            paginationInfo.textContent = `Showing ${start} to ${end} of ${total} results`;
+        }
+
+        if (paginationNav) {
+            let html = `
+                <li class="page-item ${page === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${page - 1}">Previous</a>
+                </li>
+            `;
+
+            for (let i = 1; i <= Math.min(pages, 5); i++) {
+                html += `
+                    <li class="page-item ${i === page ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `;
+            }
+
+            html += `
+                <li class="page-item ${page === pages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${page + 1}">Next</a>
+                </li>
+            `;
+
+            paginationNav.innerHTML = html;
+
+            paginationNav.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetPage = parseInt(e.target.dataset.page);
+                    if (!isNaN(targetPage)) {
+                        this.goToPage(targetPage);
+                    }
+                });
+            });
+        }
+    }
+
+    populateCategoryFilter() {
+        const categoryFilter = document.getElementById('category-filter');
+        if (!categoryFilter) return;
+
+        const categories = [...new Set(this.data.categories.map(c => c.category))];
+        
+        categoryFilter.innerHTML = '<option value="">Tất cả category</option>' + 
+            categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    }
+
+    setupEventListeners() {
+        // Search
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            let timeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    this.filters.search = e.target.value;
+                    this.currentPage = 1;
+                    this.loadProductsList().then(() => this.renderProductsList());
+                }, 500);
+            });
+        }
+
+        // Filters
+        const filterIds = ['category-filter', 'status-filter', 'min-price-filter', 'max-price-filter'];
+        filterIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', (e) => {
+                    if (id === 'category-filter') this.filters.category = e.target.value;
+                    if (id === 'status-filter') this.filters.status = e.target.value;
+                    if (id === 'min-price-filter') this.filters.minPrice = e.target.value;
+                    if (id === 'max-price-filter') this.filters.maxPrice = e.target.value;
+                    
+                    this.currentPage = 1;
+                    this.loadProductsList().then(() => this.renderProductsList());
+                });
+            }
         });
-      } else {
-        alert(message);
-      }
-    },
 
-    initCharts() {
-      // Prevent multiple chart initializations
-      if (this.chartsInitialized) return;
-      
-      this.initSalesChart();
-      this.initCategoryChart();
-      this.chartsInitialized = true;
-    },
-
-    initSalesChart() {
-      const salesChart = document.getElementById('salesChart');
-      if (!salesChart) {
-        console.warn('Sales chart element not found');
-        return;
-      }
-
-      // Clear any existing chart content
-      salesChart.innerHTML = '';
-
-      try {
-
-      // Sample sales data
-      const salesData = {
-        series: [{
-          name: 'Sales',
-          data: [65, 78, 85, 92, 88, 95, 102]
-        }],
-        chart: {
-          type: 'area',
-          height: 300,
-          toolbar: { show: false }
-        },
-        colors: ['#6366f1'],
-        fill: {
-          type: 'gradient',
-          gradient: {
-            shadeIntensity: 1,
-            opacityFrom: 0.7,
-            opacityTo: 0.3,
-          }
-        },
-        stroke: {
-          curve: 'smooth',
-          width: 2
-        },
-        xaxis: {
-          categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        },
-        yaxis: {
-          title: {
-            text: 'Sales ($1000s)'
-          }
-        },
-        tooltip: {
-          y: {
-            formatter: function (val) {
-              return "$" + val + "k"
+        // Checkboxes
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('product-checkbox')) {
+                const productId = e.target.value;
+                if (e.target.checked) {
+                    this.selectedProducts.add(productId);
+                } else {
+                    this.selectedProducts.delete(productId);
+                }
+                this.updateBulkActions();
             }
-          }
-        }
-      };
 
-        const chart = new ApexCharts(salesChart, salesData);
-        chart.render();
-      } catch (error) {
-        console.error('Error rendering sales chart:', error);
-      }
-    },
-
-    initCategoryChart() {
-      const categoryChart = document.getElementById('categoryChart');
-      if (!categoryChart) {
-        console.warn('Category chart element not found');
-        return;
-      }
-
-      // Clear any existing chart content
-      categoryChart.innerHTML = '';
-
-      try {
-
-      const chartData = {
-        series: this.categoryStats.map(cat => cat.count),
-        chart: {
-          type: 'donut',
-          height: 200
-        },
-        labels: this.categoryStats.map(cat => cat.name),
-        colors: this.categoryStats.map(cat => cat.color),
-        plotOptions: {
-          pie: {
-            donut: {
-              size: '70%'
+            if (e.target.id === 'select-all-checkbox') {
+                const isChecked = e.target.checked;
+                this.data.productsList.forEach(product => {
+                    if (isChecked) {
+                        this.selectedProducts.add(product._id);
+                    } else {
+                        this.selectedProducts.delete(product._id);
+                    }
+                });
+                this.updateBulkActions();
+                this.renderProductsList();
             }
-          }
-        },
-        legend: {
-          show: false
-        },
-        tooltip: {
-          y: {
-            formatter: function (val) {
-              return val + " products"
+        });
+
+        // Bulk actions
+        document.getElementById('bulk-display-btn')?.addEventListener('click', () => this.bulkAction('display'));
+        document.getElementById('bulk-hide-btn')?.addEventListener('click', () => this.bulkAction('hide'));
+        document.getElementById('bulk-delete-btn')?.addEventListener('click', () => this.bulkAction('delete'));
+        document.getElementById('clear-selection-btn')?.addEventListener('click', () => {
+            this.selectedProducts.clear();
+            this.updateBulkActions();
+            this.renderProductsList();
+        });
+    }
+
+    updateBulkActions() {
+        const bulkBar = document.getElementById('bulk-actions-bar');
+        const selectedCount = document.getElementById('selected-count');
+        
+        if (bulkBar && selectedCount) {
+            if (this.selectedProducts.size > 0) {
+                bulkBar.classList.remove('d-none');
+                selectedCount.textContent = this.selectedProducts.size;
+            } else {
+                bulkBar.classList.add('d-none');
             }
-          }
         }
-      };
+    }
 
-        const chart = new ApexCharts(categoryChart, chartData);
-        chart.render();
-      } catch (error) {
-        console.error('Error rendering category chart:', error);
-      }
-    },
+    async bulkAction(action) {
+        if (this.selectedProducts.size === 0) return;
+        
+        const actionText = { display: 'hiển thị', hide: 'ẩn', delete: 'xóa' }[action];
+        if (!confirm(`Bạn có chắc muốn ${actionText} ${this.selectedProducts.size} sản phẩm?`)) return;
 
-    get paginatedProducts() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.filteredProducts.slice(start, end);
-    },
-
-    get totalPages() {
-      return Math.ceil(this.filteredProducts.length / this.itemsPerPage);
-    },
-
-    get visiblePages() {
-      if (this.totalPages <= 1) return [1];
-      
-      const pages = [];
-      const delta = 2;
-      
-      // Always show first page
-      pages.push(1);
-      
-      if (this.totalPages <= 7) {
-        // If total pages is small, show all
-        for (let i = 2; i <= this.totalPages; i++) {
-          pages.push(i);
+        try {
+            const productIds = Array.from(this.selectedProducts);
+            await ProductsService.bulkAction(action, productIds);
+            alert(`${actionText.charAt(0).toUpperCase() + actionText.slice(1)} thành công!`);
+            this.selectedProducts.clear();
+            await this.loadProductsList();
+            this.renderProductsList();
+            this.updateBulkActions();
+        } catch (error) {
+            console.error('Error bulk action:', error);
+            alert('Có lỗi xảy ra!');
         }
-      } else {
-        // Complex pagination logic
-        if (this.currentPage <= 4) {
-          // Near the beginning
-          for (let i = 2; i <= 5; i++) {
-            pages.push(i);
-          }
-          pages.push('...');
-          pages.push(this.totalPages);
-        } else if (this.currentPage >= this.totalPages - 3) {
-          // Near the end
-          pages.push('...');
-          for (let i = this.totalPages - 4; i <= this.totalPages; i++) {
-            pages.push(i);
-          }
-        } else {
-          // In the middle
-          pages.push('...');
-          for (let i = this.currentPage - 1; i <= this.currentPage + 1; i++) {
-            pages.push(i);
-          }
-          pages.push('...');
-          pages.push(this.totalPages);
-        }
-      }
-      
-      return pages;
-    },
+    }
 
-    goToPage(page) {
-      if (page >= 1 && page <= this.totalPages) {
+    async deleteProduct(productId) {
+        if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
+        
+        try {
+            await ProductsService.deleteProduct(productId);
+            alert('Xóa thành công!');
+            await this.loadProductsList();
+            this.renderProductsList();
+        } catch (error) {
+            console.error('Error delete product:', error);
+            alert('Có lỗi xảy ra!');
+        }
+    }
+
+    async goToPage(page) {
+        if (!this.data.pagination) return;
+        if (page < 1 || page > this.data.pagination.pages) return;
+        
         this.currentPage = page;
-      }
+        await this.loadProductsList();
+        this.renderProductsList();
+        
+        document.getElementById('products-list-tbody')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }));
 
-  // Product form component for modals
-  Alpine.data('productForm', () => ({
-    form: {
-      name: '',
-      sku: '',
-      category: '',
-      price: '',
-      stock: '',
-      description: '',
-      status: 'draft'
-    },
-
-    saveProduct() {
-      // Validation
-      if (!this.form.name || !this.form.sku || !this.form.category || 
-          !this.form.price || !this.form.stock || !this.form.status) {
-        alert('Please fill in all required fields');
-        return;
-      }
-
-      console.log('Saving product:', this.form);
-      
-      // In a real app, this would make an API call
-      // For now, just show success message
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          title: 'Product Saved!',
-          text: 'The product has been saved successfully',
-          icon: 'success',
-          confirmButtonText: 'OK'
-        });
-      } else {
-        alert('Product saved successfully!');
-      }
-
-      // Reset form
-      this.form = {
-        name: '',
-        sku: '',
-        category: '',
-        price: '',
-        stock: '',
-        description: '',
-        status: 'draft'
-      };
+    // Utilities
+    getStatusBadgeClass(status) {
+        const classes = {
+            'pending': 'bg-warning text-dark',
+            'displayed': 'bg-success',
+            'hidden': 'bg-secondary',
+            'violated': 'bg-danger'
+        };
+        return classes[status] || 'bg-secondary';
     }
-  }));
 
-  // Search component for header
-  Alpine.data('searchComponent', () => ({
-    query: '',
-    
-    search() {
-      console.log('Searching for:', this.query);
-      // Implement search functionality
+    getStatusText(status) {
+        const texts = {
+            'pending': 'Pending',
+            'displayed': 'Displayed',
+            'hidden': 'Hidden',
+            'violated': 'Violated'
+        };
+        return texts[status] || status;
     }
-  }));
 
-  // Theme switch component
-  Alpine.data('themeSwitch', () => ({
-    currentTheme: 'light',
-
-    init() {
-      this.currentTheme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
-    },
-
-    toggle() {
-      this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
-      localStorage.setItem('theme', this.currentTheme);
+    setText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
     }
-  }));
-});
+}
+
+if (typeof window !== 'undefined') {
+    window.ProductsManager = ProductsManager;
+}

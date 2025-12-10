@@ -334,7 +334,7 @@
                                     <i class="bi bi-people-fill fs-3"></i>
                                 </div>
                                 <div>
-                                    <h6 class="text-secondary text-uppercase mb-1 small">Total Users</h6>
+                                    <h6 class="text-secondary text-uppercase mb-1 small">Tổng người dùng</h6>
                                     <h2 class="fw-bold mb-0 text-white" id="total-users-count">0</h2>
                                     <small class="text-success"><i class="bi bi-arrow-up"></i> Tất cả tài khoản</small>
                                 </div>
@@ -350,7 +350,7 @@
                                     <i class="bi bi-person-check-fill fs-3"></i>
                                 </div>
                                 <div>
-                                    <h6 class="text-secondary text-uppercase mb-1 small">Active Users</h6>
+                                    <h6 class="text-secondary text-uppercase mb-1 small">Người dùng đang hoạt động</h6>
                                     <h2 class="fw-bold mb-0 text-white" id="active-users-count">0</h2>
                                     <small class="text-success"><i class="bi bi-arrow-up"></i> Đang hoạt động</small>
                                 </div>
@@ -365,7 +365,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0 text-white">User Registration Trends</h5>
+                            <h5 class="card-title mb-0 text-white">Thống kê đăng ký người dùng</h5>
                             <div class="btn-group btn-group-sm" role="group">
                                 <button type="button" class="btn btn-outline-secondary active" data-period="7days">7 Ngày</button>
                                 <button type="button" class="btn btn-outline-secondary" data-period="1month">1 Tháng</button>
@@ -385,7 +385,7 @@
                 <div class="col-lg-8">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5 class="card-title mb-0 text-white">Recent Activity</h5>
+                            <h5 class="card-title mb-0 text-white">Hoạt động của người dùng gần đây</h5>
                         </div>
                         <div class="card-body p-0">
                             <div id="recent-activities-list" style="max-height: 400px; overflow-y: auto;">
@@ -399,7 +399,7 @@
                 <div class="col-lg-4">
                     <div class="card h-100">
                         <div class="card-header">
-                            <h5 class="card-title mb-0 text-white">User Distribution</h5>
+                            <h5 class="card-title mb-0 text-white">Phân bố loại người dùng</h5>
                         </div>
                         <div class="card-body">
                             <div id="userDistributionChart"></div>
@@ -415,7 +415,7 @@
                         <div class="card-header">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h5 class="card-title mb-0 text-white">Users Directory</h5>
+                                    <h5 class="card-title mb-0 text-white">Danh sách người dùng</h5>
                                 </div>
                                 <div class="col-auto">
                                     <div class="d-flex gap-2">
@@ -424,28 +424,37 @@
                                             <input type="search" 
                                                 id="search-input"
                                                 class="form-control form-control-sm" 
-                                                placeholder="Tìm kiếm..."
-                                                style="width: 200px;">
+                                                placeholder="Tìm kiếm (tên, email, phone)..."
+                                                style="width: 250px;">
                                             <i class="bi bi-search position-absolute top-50 end-0 translate-middle-y me-2 text-muted"></i>
                                         </div>
-                                        
-                                        <!-- Status Filter -->
-                                        <select class="form-select form-select-sm" 
-                                                id="status-filter"
-                                                style="width: 150px;">
-                                            <option value="">Tất cả trạng thái</option>
-                                            <option value="active">Active</option>
-                                            <option value="inactive">Inactive</option>
-                                        </select>
                                         
                                         <!-- Role Filter -->
                                         <select class="form-select form-select-sm" 
                                                 id="role-filter"
-                                                style="width: 150px;">
-                                            <option value="">Tất cả vai trò</option>
+                                                style="width: 130px;">
+                                            <option value="">Tất cả Role</option>
                                             <option value="admin">Admin</option>
                                             <option value="user">User</option>
+                                        </select>
+                                        
+                                        <!-- Account Type Filter -->
+                                        <select class="form-select form-select-sm" 
+                                                id="account-type-filter"
+                                                style="width: 130px;">
+                                            <option value="">Tất cả loại</option>
                                             <option value="seller">Seller</option>
+                                            <option value="buyer">Buyer</option>
+                                        </select>
+
+                                        <!-- Login Method Filter -->
+                                        <select class="form-select form-select-sm" 
+                                                id="login-method-filter"
+                                                style="width: 150px;">
+                                            <option value="">Tất cả đăng nhập</option>
+                                            <option value="local">Email/Password</option>
+                                            <option value="google">Google</option>
+                                            <option value="facebook">Facebook</option>
                                         </select>
                                     </div>
                                 </div>
@@ -491,9 +500,10 @@
                                             </th>
                                             <th>Name</th>
                                             <th>Role</th>
-                                            <th>Status</th>
+                                            <th>Account Type</th>
+                                            <th>Login Method</th>
                                             <th>Last Active</th>
-                                            <th style="width: 120px;">Actions</th>
+                                            <th style="width: 100px;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="users-directory-tbody">

@@ -10,16 +10,21 @@ export class UsersManager {
             activeUsers: 0,
             userDistribution: { users: 0, sellers: 0 },
             recentActivities: [],
-            usersDirectory: []
+            usersDirectory: [],
+            pagination: null
         };
         this.selectedUsers = new Set();
         this.currentPeriod = '7days';
         this.filters = {
             search: '',
-            status: '',
-            role: ''
+            role: '',
+            accountType: '',
+            loginMethod: ''
         };
         this.currentPage = 1;
+        
+        // Assign to window immediately
+        window.usersManager = this;
         
         if (document.getElementById('total-users-count')) {
             this.init();
@@ -28,20 +33,28 @@ export class UsersManager {
 
     async init() {
         console.log('🚀 Users Manager Initialized');
+        
         try {
             await Promise.all([
-                this.loadSummaryData(),
-                this.loadGrowthChart(),
-                this.loadRecentActivities(),
-                this.loadUsersDirectory()
+                this.loadSummaryData().catch(e => console.error('Summary error:', e)),
+                this.loadGrowthChart().catch(e => console.error('Growth chart error:', e)),
+                this.loadRecentActivities().catch(e => console.error('Activities error:', e)),
+                this.loadUsersDirectory().catch(e => console.error('Directory error:', e))
             ]);
             
+            await this.$nextTick();
             this.renderUI();
             this.setupEventListeners();
-            console.log('✅ Users loaded successfully');
+            
+            console.log('✅ Users page loaded successfully');
+            
         } catch (error) {
-            console.error('❌ Error loading users:', error);
+            console.error('❌ Fatal error loading users:', error);
         }
+    }
+
+    $nextTick() {
+        return new Promise(resolve => setTimeout(resolve, 100));
     }
 
     async loadSummaryData() {
@@ -64,9 +77,12 @@ export class UsersManager {
 
     async loadRecentActivities() {
         try {
+            console.log('📊 Loading recent activities...');
             this.data.recentActivities = await UsersService.getRecentActivities(20);
+            console.log('✅ Loaded activities:', this.data.recentActivities.length);
         } catch (error) {
-            console.error('Error loading activities:', error);
+            console.error('❌ Error loading activities:', error);
+            this.data.recentActivities = [];
         }
     }
 
@@ -104,7 +120,12 @@ export class UsersManager {
 
         const options = {
             series: [{ name: 'Người dùng mới', data: data.map(d => d.count) }],
-            chart: { type: 'bar', height: 350, toolbar: { show: false } },
+            chart: { 
+                type: 'bar', 
+                height: 350, 
+                toolbar: { show: false },
+                background: 'transparent'
+            },
             plotOptions: {
                 bar: {
                     borderRadius: 6,
@@ -128,7 +149,7 @@ export class UsersManager {
                     style: { colors: '#6c757d' }
                 }
             },
-            grid: { borderColor: '#e9ecef' },
+            grid: { borderColor: '#2d3748' },
             tooltip: {
                 y: { formatter: (val) => `${val} người dùng` },
                 theme: 'dark'
@@ -148,14 +169,18 @@ export class UsersManager {
 
         const options = {
             series: [users, sellers],
-            chart: { type: 'donut', height: 300 },
+            chart: { type: 'donut', height: 300, background: 'transparent' },
             labels: ['Người dùng', 'Người bán'],
             colors: ['#0d6efd', '#fd7e14'],
-            legend: { position: 'bottom', fontSize: '13px', labels: { colors: '#fff' } },
+            legend: { 
+                position: 'bottom', 
+                fontSize: '13px', 
+                labels: { colors: '#fff' } 
+            },
             dataLabels: { 
                 enabled: true, 
                 formatter: (val) => `${val.toFixed(1)}%`,
-                style: { fontSize: '14px', fontWeight: 'bold' }
+                style: { fontSize: '14px', fontWeight: 'bold', colors: ['#fff'] }
             },
             tooltip: {
                 y: { formatter: (val) => `${val} tài khoản` },
@@ -172,32 +197,46 @@ export class UsersManager {
 
     renderRecentActivities() {
         const container = document.getElementById('recent-activities-list');
-        if (!container) return;
+        
+        if (!container) {
+            console.warn('⚠️ Container #recent-activities-list not found');
+            return;
+        }
 
-        if (this.data.recentActivities.length === 0) {
-            container.innerHTML = '<div class="text-center text-muted py-4">Chưa có hoạt động nào</div>';
+        console.log('🎨 Rendering activities:', this.data.recentActivities?.length || 0);
+
+        if (!Array.isArray(this.data.recentActivities) || this.data.recentActivities.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    <p class="mb-0">Chưa có hoạt động nào</p>
+                </div>
+            `;
             return;
         }
 
         container.innerHTML = this.data.recentActivities.map(activity => `
-            <div class="activity-item d-flex align-items-start p-3 border-bottom">
+            <div class="activity-item d-flex align-items-start p-3 border-bottom border-secondary">
                 <div class="activity-icon me-3">
-                    <div class="icon-circle bg-${activity.iconColor} bg-opacity-10 text-${activity.iconColor} rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                        <i class="bi bi-${activity.icon}"></i>
+                    <div class="icon-circle bg-${activity.iconColor || 'primary'} bg-opacity-10 text-${activity.iconColor || 'primary'} rounded-circle d-flex align-items-center justify-content-center" 
+                         style="width: 40px; height: 40px;">
+                        <i class="bi bi-${activity.icon || 'circle-fill'}"></i>
                     </div>
                 </div>
                 <div class="flex-grow-1">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <span class="fw-bold text-white">${activity.user}</span>
-                            <span class="text-secondary ms-1">${activity.action}</span>
+                            <span class="fw-bold text-white">${activity.user || 'Unknown'}</span>
+                            <span class="text-secondary ms-1">${activity.action || 'thực hiện hành động'}</span>
                         </div>
                         <small class="text-muted">${this.formatTime(activity.time)}</small>
                     </div>
-                    <small class="text-muted d-block mt-1">${activity.details}</small>
+                    <small class="text-muted d-block mt-1">${activity.details || ''}</small>
                 </div>
             </div>
         `).join('');
+
+        console.log('✅ Activities rendered successfully');
     }
 
     renderUsersDirectory() {
@@ -222,7 +261,8 @@ export class UsersManager {
                         <img src="${user.avatar || '/assets/icons/icon-192.png'}" 
                              class="rounded-circle me-2" 
                              width="32" height="32" 
-                             alt="${user.name}">
+                             alt="${user.name || user.email}"
+                             onerror="this.src='/assets/icons/icon-192.png'">
                         <div>
                             <div class="fw-medium text-white">${user.name || user.email}</div>
                             <small class="text-muted">${user.email}</small>
@@ -230,13 +270,19 @@ export class UsersManager {
                     </div>
                 </td>
                 <td>
-                    <span class="badge ${this.getRoleBadgeClass(user)}">
-                        ${this.getRoleText(user)}
+                    <span class="badge ${user.role === 'admin' ? 'bg-danger' : 'bg-primary'}">
+                        ${user.role === 'admin' ? 'Admin' : 'User'}
                     </span>
                 </td>
                 <td>
-                    <span class="badge ${user.role === 'admin' ? 'bg-danger' : 'bg-success'}">
-                        ${user.role === 'admin' ? 'Admin' : 'Active'}
+                    <span class="badge ${user.isSeller ? 'bg-warning text-dark' : 'bg-info'}">
+                        ${user.isSeller ? 'Seller' : 'Buyer'}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge bg-secondary">
+                        <i class="bi bi-${this.getLoginMethodIcon(user.loginMethod)} me-1"></i>
+                        ${this.getLoginMethodText(user.loginMethod)}
                     </span>
                 </td>
                 <td class="text-secondary">${new Date(user.updatedAt).toLocaleDateString('vi-VN')}</td>
@@ -251,7 +297,7 @@ export class UsersManager {
                             <li><a class="dropdown-item" href="#"><i class="bi bi-pencil me-2"></i>Edit</a></li>
                             <li><a class="dropdown-item" href="#"><i class="bi bi-eye me-2"></i>View</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="#" onclick="window.usersManager.deleteUser('${user._id}')">
+                            <li><a class="dropdown-item text-danger" href="#" onclick="window.usersManager.deleteUser('${user._id}'); return false;">
                                 <i class="bi bi-trash me-2"></i>Delete
                             </a></li>
                         </ul>
@@ -300,7 +346,7 @@ export class UsersManager {
 
             paginationNav.innerHTML = html;
 
-            // ✅ Thêm event listeners cho pagination
+            // Add event listeners
             paginationNav.querySelectorAll('.page-link').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -311,20 +357,6 @@ export class UsersManager {
                 });
             });
         }
-    }
-
-    async goToPage(page) {
-        if (!this.data.pagination) return;
-        if (page < 1 || page > this.data.pagination.pages) return;
-        
-        console.log('📄 Going to page:', page);
-        
-        this.currentPage = page;
-        await this.loadUsersDirectory();
-        this.renderUsersDirectory();
-        
-        // Scroll to top of table
-        document.getElementById('users-directory-tbody')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     setupEventListeners() {
@@ -341,20 +373,14 @@ export class UsersManager {
         // Search
         const searchInput = document.getElementById('search-input');
         if (searchInput) {
+            let timeout;
             searchInput.addEventListener('input', (e) => {
-                this.filters.search = e.target.value;
-                this.currentPage = 1;
-                this.loadUsersDirectory().then(() => this.renderUsersDirectory());
-            });
-        }
-
-        // Status filter
-        const statusFilter = document.getElementById('status-filter');
-        if (statusFilter) {
-            statusFilter.addEventListener('change', (e) => {
-                this.filters.status = e.target.value;
-                this.currentPage = 1;
-                this.loadUsersDirectory().then(() => this.renderUsersDirectory());
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    this.filters.search = e.target.value;
+                    this.currentPage = 1;
+                    this.loadUsersDirectory().then(() => this.renderUsersDirectory());
+                }, 500);
             });
         }
 
@@ -363,6 +389,26 @@ export class UsersManager {
         if (roleFilter) {
             roleFilter.addEventListener('change', (e) => {
                 this.filters.role = e.target.value;
+                this.currentPage = 1;
+                this.loadUsersDirectory().then(() => this.renderUsersDirectory());
+            });
+        }
+
+        // Account Type filter
+        const accountTypeFilter = document.getElementById('account-type-filter');
+        if (accountTypeFilter) {
+            accountTypeFilter.addEventListener('change', (e) => {
+                this.filters.accountType = e.target.value;
+                this.currentPage = 1;
+                this.loadUsersDirectory().then(() => this.renderUsersDirectory());
+            });
+        }
+
+        // Login Method filter
+        const loginMethodFilter = document.getElementById('login-method-filter');
+        if (loginMethodFilter) {
+            loginMethodFilter.addEventListener('change', (e) => {
+                this.filters.loginMethod = e.target.value;
                 this.currentPage = 1;
                 this.loadUsersDirectory().then(() => this.renderUsersDirectory());
             });
@@ -458,20 +504,32 @@ export class UsersManager {
         if (!this.data.pagination) return;
         if (page < 1 || page > this.data.pagination.pages) return;
         
+        console.log('📄 Going to page:', page);
+        
         this.currentPage = page;
         await this.loadUsersDirectory();
         this.renderUsersDirectory();
+        
+        document.getElementById('users-directory-tbody')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // Utilities
-    getRoleBadgeClass(user) {
-        if (user.isSeller) return 'bg-warning text-dark';
-        return user.role === 'admin' ? 'bg-danger' : 'bg-primary';
+    getLoginMethodIcon(method) {
+        const icons = {
+            'local': 'envelope-fill',
+            'google': 'google',
+            'facebook': 'facebook'
+        };
+        return icons[method] || 'question-circle';
     }
 
-    getRoleText(user) {
-        if (user.isSeller) return 'Seller';
-        return user.role === 'admin' ? 'Admin' : 'User';
+    getLoginMethodText(method) {
+        const texts = {
+            'local': 'Email',
+            'google': 'Google',
+            'facebook': 'Facebook'
+        };
+        return texts[method] || method;
     }
 
     setText(id, text) {
@@ -491,7 +549,7 @@ export class UsersManager {
     }
 }
 
-// Export global instance
+// Export
 if (typeof window !== 'undefined') {
     window.UsersManager = UsersManager;
 }
