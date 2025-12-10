@@ -21,6 +21,7 @@ import {
 
 // Import our custom modules
 import { ThemeManager } from './utils/theme-manager.js';
+import { AnalyticsManager } from './components/analytics.js'; 
 import { DashboardManager } from './components/dashboard.js';
 import { NotificationManager } from './utils/notifications.js';
 import { iconManager } from './utils/icon-manager.js';

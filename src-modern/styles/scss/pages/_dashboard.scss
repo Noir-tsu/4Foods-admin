@@ -1,0 +1,135 @@
+// src-modern/styles/scss/pages/_dashboard.scss
+
+// ========== STATS CARDS ==========
+.overview-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+
+        h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .text-success, .text-danger {
+            font-weight: 600;
+        }
+    }
+}
+
+// ========== ACTIVITY LIST ==========
+.activity-list {
+    max-height: 380px;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 3px;
+    }
+
+    .activity-item {
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: #f8f9fa;
+        }
+
+        &:last-child {
+            border-bottom: none !important;
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e7f3ff;
+            border-radius: 50%;
+
+            i {
+                font-size: 1rem;
+            }
+        }
+    }
+}
+
+// ========== TABLE STYLING ==========
+.table-hover tbody tr {
+    transition: background-color 0.2s;
+
+    &:hover {
+        background-color: #f8f9fa;
+    }
+}
+
+.table-responsive {
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 3px;
+    }
+}
+
+// ========== CHART CARDS ==========
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+    .card-header {
+        background: transparent;
+        border-bottom: 1px solid #e9ecef;
+        padding: 1.25rem 1.5rem;
+        font-weight: 600;
+
+        h5 {
+            font-size: 1.1rem;
+            margin: 0;
+        }
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+}
+
+// ========== BADGE STYLING ==========
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+// ========== RESPONSIVE ==========
+@media (max-width: 768px) {
+    .overview-card .card-body h3 {
+        font-size: 1.5rem;
+    }
+
+    .activity-list {
+        max-height: 300px !important;
+    }
+
+    .table-responsive {
+        max-height: 350px !important;
+    }
+}

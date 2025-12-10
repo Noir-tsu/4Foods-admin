@@ -1,0 +1,107 @@
+1. Tổng quan project
+Project của bạn là một hệ thống quản trị web (admin dashboard) cho nền tảng 4Foods, được xây dựng với cấu trúc hiện đại, sử dụng các công nghệ web phổ biến. Dự án bao gồm các phần sau:
+
+dist-modern/: Thư mục chứa các file đã được build (sản phẩm cuối cùng), bao gồm các file HTML, JS, CSS, và assets đã được tối ưu hóa để deploy lên server.
+src-modern/: Thư mục chứa mã nguồn chính, bao gồm các file HTML, JS, SCSS, assets (hình ảnh, icon), scripts (component, utils), và styles (SCSS cho từng thành phần, layout, theme, page).
+package.json: Quản lý các dependencies, scripts, và thông tin dự án (có thể sử dụng npm hoặc yarn để quản lý).
+vite.config.js: File cấu hình cho Vite (công cụ build hiện đại cho frontend).
+README.md, LICENSE.md, CHANGELOG.md, RELEASE_NOTES_v3.x.x.md: Các file tài liệu, ghi chú thay đổi, và thông tin bản quyền.
+
+2. Cấu trúc mã nguồn
+src-modern/assets/: Chứa hình ảnh, icon phục vụ cho giao diện.
+src-modern/scripts/components/: Chứa các file JS cho từng component (dashboard, sidebar, users, products, orders, ...).
+src-modern/scripts/utils/: Chứa các hàm tiện ích như quản lý icon, thông báo, theme.
+src-modern/styles/scss/: Chứa các file SCSS cho từng thành phần, layout, theme, và page.
+src-modern/*.html: Các trang HTML cho từng chức năng (dashboard, users, products, orders, ...).
+
+
+✔ Dự án nhỏ → viết luôn trong api.js cũng được.
+✔ Dự án lớn → tách ra api.js (endpoint) + service (gọi API) là chuẩn nhất.
+
+4Foods-admin/
+├── CHANGELOG.md
+├── LICENSE.md
+├── package.json
+├── README.md
+├── RELEASE_NOTES_v3.0.0.md
+├── RELEASE_NOTES_v3.1.0.md
+├── vite.config.js
+├── dist-modern/
+│   ├── *.html
+│   └── assets/
+│       ├── *.js
+│       ├── *.css
+│       └── ...
+├── src-modern/
+│   ├── analytics.html
+│   ├── calendar.html
+│   ├── elements-alerts.html
+│   ├── elements-badges.html
+│   ├── elements-buttons.html
+│   ├── elements-cards.html
+│   ├── elements-forms.html
+│   ├── elements-modals.html
+│   ├── elements-tables.html
+│   ├── elements.html
+│   ├── files.html
+│   ├── forms.html
+│   ├── help.html
+│   ├── index.html
+│   ├── messages.html
+│   ├── orders.html
+│   ├── products.html
+│   ├── reports.html
+│   ├── security.html
+│   ├── settings.html
+│   ├── users.html
+│   ├── manifest.json
+│   ├── assets/
+│   │   ├── icons/
+│   │   └── images/
+│   ├── scripts/
+│   │   ├── main.js
+│   │   ├── components/
+│   │   │   ├── analytics.js
+│   │   │   ├── calendar.js
+│   │   │   ├── dashboard.js
+│   │   │   ├── elements.js
+│   │   │   ├── files.js
+│   │   │   ├── forms.js
+│   │   │   ├── help.js
+│   │   │   ├── messages.js
+│   │   │   ├── orders.js
+│   │   │   ├── products.js
+│   │   │   ├── reports.js
+│   │   │   ├── security.js
+│   │   │   ├── settings.js
+│   │   │   ├── sidebar.js
+│   │   │   └── users.js
+│   │   └── utils/
+│   │       ├── icon-manager.js
+│   │       ├── notifications.js
+│   │       └── theme-manager.js
+│   └── styles/
+│       └── scss/
+│           ├── main.scss
+│           ├── abstracts/
+│           ├── components/
+│           ├── layout/
+│           ├── pages/
+│           └── themes/
+
+Đây là cấu trúc cây thư mục khi chỉnh sửa
+4Foods-admin/
+├── src-modern/
+│   ├── index.html                  
+│   ├── scripts/
+│   │   ├── components/
+│   │   │   └── dashboard.js        # ✅ (Sửa) Chỉ chứa Logic UI & Charts (gọi Service)
+│   │   └── utils/
+│   │       ├── api.js              # 🆕 (Thêm) Chứa cấu hình endpoints & constants
+│   │       ├── api.client.js       # 🆕 (Thêm) HTTP Client (wrapper cho fetch)
+│   │       └── services/           # 🆕 (Thêm) Folder chứa logic nghiệp vụ
+│   │           └── dashboard.service.js # 🆕 (Thêm) Gọi API lấy data cho dashboard
+│   └── styles/
+│       └── scss/
+│           └── pages/
+│               └── _dashboard.scss # 🆕 (Thêm) Style riêng cho Dashboard (import vào main.scss)

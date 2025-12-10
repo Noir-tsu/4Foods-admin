@@ -1,653 +1,403 @@
-// ==========================================================================
-// Dashboard Manager - Advanced data visualization and components
-// ==========================================================================
+// src-modern/scripts/components/dashboard.js
 
-import {
-  Chart,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  LineController,
-  BarController,
-  DoughnutController,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement,
-} from 'chart.js';
-import ApexCharts from 'apexcharts';
-
-// Register Chart.js components and controllers
-Chart.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  LineController,
-  BarController,
-  DoughnutController,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
+import { Chart } from 'chart.js/auto';
+import { DashboardService } from '../utils/services/dashboard.service.js';
 
 export class DashboardManager {
-  constructor() {
-    this.charts = new Map();
-    this.data = {
-      revenue: [],
-      users: [],
-      orders: [],
-      performance: [],
-      recentOrders: [],
-      salesByLocation: []
-    };
-    this.init();
-  }
-
-  async init() {
-    console.log('🚀 Advanced Dashboard Manager initialized');
-    
-    // Load sample data
-    await this.loadDashboardData();
-    
-    // Initialize charts
-    this.initRevenueChart();
-    this.initUserGrowthChart();
-    this.initOrderStatusChart();
-    this.initStorageChart();
-    this.initSalesByLocationChart();
-    this.populateRecentOrders();
-    
-    // Initialize real-time updates
-    this.startRealTimeUpdates();
-    
-    // Initialize interactive elements
-    this.initInteractiveElements();
-  }
-
-  async loadDashboardData() {
-    // Simulate API call with realistic data
-    this.data.revenue = this.generateRevenueData();
-    this.data.users = this.generateUserData();
-    this.data.orders = this.generateOrderData();
-    this.data.performance = this.generatePerformanceData();
-    this.data.recentOrders = this.generateRecentOrders();
-    this.data.salesByLocation = this.generateSalesByLocation();
-  }
-
-  generateRevenueData() {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return months.map(month => ({
-      month,
-      revenue: Math.floor(Math.random() * 50000) + 10000,
-      profit: Math.floor(Math.random() * 20000) + 5000
-    }));
-  }
-
-  generateUserData() {
-    const days = Array.from({length: 30}, (_, i) => i + 1);
-    return days.map(day => ({
-      day,
-      newUsers: Math.floor(Math.random() * 100) + 20,
-      activeUsers: Math.floor(Math.random() * 500) + 200
-    }));
-  }
-
-  generateOrderData() {
-    return {
-      completed: 1245,
-      pending: 87,
-      cancelled: 23,
-      processing: 156
-    };
-  }
-
-  generateRecentOrders() {
-    const customers = ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Wilson', 'Bob Brown'];
-    const statuses = [
-        { text: 'Completed', class: 'bg-success' },
-        { text: 'Pending', class: 'bg-warning' },
-        { text: 'Shipped', class: 'bg-info' },
-        { text: 'Cancelled', class: 'bg-danger' }
-    ];
-    return Array.from({length: 5}, (_, i) => ({
-        id: `#${Math.floor(Math.random() * 9000) + 1000}`,
-        customer: customers[Math.floor(Math.random() * customers.length)],
-        amount: `$${(Math.random() * 500 + 50).toFixed(2)}`,
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        date: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24 * 7).toLocaleDateString()
-    }));
-  }
-
-  generateSalesByLocation() {
-    return [
-        { "name": "United States", "value": 2822},
-        { "name": "Canada", "value": 1432},
-        { "name": "United Kingdom", "value": 980},
-        { "name": "Australia", "value": 780},
-        { "name": "Germany", "value": 650},
-        { "name": "Brazil", "value": 450},
-        { "name": "India", "value": 1800},
-        { "name": "China", "value": 2100},
-        { "name": "Japan", "value": 850},
-        { "name": "Russia", "value": 550}
-    ]
-  }
-
-  generatePerformanceData() {
-    const hours = Array.from({length: 24}, (_, i) => i);
-    return hours.map(hour => ({
-      hour: `${hour.toString().padStart(2, '0')}:00`,
-      responseTime: Math.random() * 2 + 0.5,
-      requests: Math.floor(Math.random() * 1000) + 100
-    }));
-  }
-
-  initRevenueChart() {
-    const ctx = document.getElementById('revenueChart');
-    if (!ctx) return;
-
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: this.data.revenue.map(item => item.month),
-        datasets: [
-          {
-            label: 'Revenue',
-            data: this.data.revenue.map(item => item.revenue),
-            borderColor: 'rgb(99, 102, 241)',
-            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: 'rgb(99, 102, 241)',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 6,
-            pointHoverRadius: 8
-          },
-          {
-            label: 'Profit',
-            data: this.data.revenue.map(item => item.profit),
-            borderColor: 'rgb(16, 185, 129)',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: 'rgb(16, 185, 129)',
-            pointBorderColor: '#fff',
-            pointBorderWidth: 2,
-            pointRadius: 6,
-            pointHoverRadius: 8
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-          intersect: false,
-          mode: 'index'
-        },
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: {
-              usePointStyle: true,
-              padding: 20
-            }
-          },
-          tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-            borderWidth: 1,
-            cornerRadius: 8,
-            displayColors: true,
-            callbacks: {
-              label: function(context) {
-                return `${context.dataset.label}: $${context.parsed.y.toLocaleString()}`;
-              }
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              display: false
-            },
-            border: {
-              display: false
-            }
-          },
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(0, 0, 0, 0.1)'
-            },
-            border: {
-              display: false
-            },
-            ticks: {
-              callback: function(value) {
-                return '$' + value.toLocaleString();
-              }
-            }
-          }
-        }
-      }
-    });
-
-    this.charts.set('revenue', chart);
-  }
-
-  initUserGrowthChart() {
-    const ctx = document.getElementById('userGrowthChart');
-    if (!ctx) return;
-
-    const chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: this.data.users.slice(-7).map(item => `Day ${item.day}`),
-        datasets: [
-          {
-            label: 'New Users',
-            data: this.data.users.slice(-7).map(item => item.newUsers),
-            backgroundColor: 'rgba(99, 102, 241, 0.8)',
-            borderColor: 'rgb(99, 102, 241)',
-            borderWidth: 1,
-            borderRadius: 6,
-            borderSkipped: false
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              display: false
-            }
-          },
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(0, 0, 0, 0.1)'
-            }
-          }
-        }
-      }
-    });
-
-    this.charts.set('userGrowth', chart);
-  }
-
-  initOrderStatusChart() {
-    const ctx = document.getElementById('orderStatusChart');
-    if (!ctx) return;
-
-    const chart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Completed', 'Processing', 'Pending', 'Cancelled'],
-        datasets: [{
-          data: [
-            this.data.orders.completed,
-            this.data.orders.processing,
-            this.data.orders.pending,
-            this.data.orders.cancelled
-          ],
-          backgroundColor: [
-            'rgba(16, 185, 129, 0.8)',
-            'rgba(99, 102, 241, 0.8)',
-            'rgba(245, 158, 11, 0.8)',
-            'rgba(239, 68, 68, 0.8)'
-          ],
-          borderWidth: 0,
-          cutout: '60%'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 20,
-              usePointStyle: true
-            }
-          }
-        }
-      }
-    });
-
-    this.charts.set('orderStatus', chart);
-  }
-
-  initStorageChart() {
-    const options = {
-      chart: {
-        height: 280,
-        type: "radialBar",
-      },
-      series: [76],
-      colors: ["#20E647"],
-      plotOptions: {
-        radialBar: {
-          hollow: {
-            margin: 0,
-            size: "70%",
-            background: "#293450"
-          },
-          track: {
-            dropShadow: {
-              enabled: true,
-              top: 2,
-              left: 0,
-              blur: 4,
-              opacity: 0.15
-            }
-          },
-          dataLabels: {
-            name: {
-              offsetY: -10,
-              color: "#fff",
-              fontSize: "13px"
-            },
-            value: {
-              color: "#fff",
-              fontSize: "30px",
-              show: true
-            }
-          }
-        }
-      },
-      fill: {
-        type: "gradient",
-        gradient: {
-          shade: "dark",
-          type: "vertical",
-          gradientToColors: ["#87D4F9"],
-          stops: [0, 100]
-        }
-      },
-      stroke: {
-        lineCap: "round"
-      },
-      labels: ["Used Space"]
-    };
-
-    const chart = new ApexCharts(document.querySelector("#storageStatusChart"), options);
-    chart.render();
-    this.charts.set('storage', chart);
-  }
-
-  initSalesByLocationChart() {
-      const chartElement = document.querySelector("#salesByLocationChart");
-      if (!chartElement) return;
-
-      const options = {
-          series: [{
-              name: 'Sales',
-              data: this.data.salesByLocation.map(c => ({ x: c.name, y: c.value }))
-          }],
-          chart: {
-              type: 'treemap',
-              height: 350,
-              width: '100%',
-              toolbar: {
-                  show: true,
-                  tools: {
-                      download: true,
-                      selection: false,
-                      zoom: false,
-                      zoomin: false,
-                      zoomout: false,
-                      pan: false,
-                      reset: false
-                  }
-              },
-              events: {
-                  mounted: (chart) => {
-                      chart.windowResizeHandler();
-                  }
-              }
-          },
-          dataLabels: {
-              enabled: true,
-              style: {
-                  fontSize: '12px',
-              },
-              formatter: function(text, op) {
-                  return [text, op.value]
-              },
-              offsetY: -4
-          },
-          plotOptions: {
-              treemap: {
-                  enableShades: true,
-                  shadeIntensity: 0.5,
-                  reverseNegativeShade: true,
-                  colorScale: {
-                      ranges: [
-                          { from: 0, to: 1000, color: '#CDD7B6' },
-                          { from: 1001, to: 2000, color: '#A4B494' },
-                          { from: 2001, to: 3000, color: '#52708E' }
-                      ]
-                  }
-              }
-          },
-          responsive: [{
-              breakpoint: 1200,
-              options: {
-                  chart: {
-                      height: 350
-                  },
-                  dataLabels: {
-                      style: {
-                          fontSize: '11px'
-                      }
-                  }
-              }
-          }, {
-              breakpoint: 768,
-              options: {
-                  chart: {
-                      height: 300
-                  },
-                  dataLabels: {
-                      style: {
-                          fontSize: '10px'
-                      }
-                  }
-              }
-          }]
-      };
-
-      const chart = new ApexCharts(chartElement, options);
-      chart.render();
-      this.charts.set('salesByLocation', chart);
-
-      // Force resize on window resize for better responsiveness
-      window.addEventListener('resize', () => {
-          if (this.charts.has('salesByLocation')) {
-              setTimeout(() => {
-                  chart.updateOptions({
-                      chart: {
-                          width: '100%'
-                      }
-                  }, false, true);
-              }, 100);
-          }
-      });
-  }
-
-  populateRecentOrders() {
-      const tableBody = document.getElementById('recent-orders-table');
-      if (!tableBody) return;
-
-      tableBody.innerHTML = this.data.recentOrders.map(order => `
-          <tr>
-              <td><strong>${order.id}</strong></td>
-              <td>${order.customer}</td>
-              <td>${order.amount}</td>
-              <td><span class="badge ${order.status.class}">${order.status.text}</span></td>
-              <td>${order.date}</td>
-          </tr>
-      `).join('');
-  }
-
-  startRealTimeUpdates() {
-    // Update charts every 30 seconds with new data
-    setInterval(() => {
-      this.updateChartsWithRealTimeData();
-    }, 30000);
-  }
-
-  updateChartsWithRealTimeData() {
-    // Update revenue chart
-    const revenueChart = this.charts.get('revenue');
-    if (revenueChart) {
-      const newRevenue = Math.floor(Math.random() * 50000) + 10000;
-      const newProfit = Math.floor(Math.random() * 20000) + 5000;
-      
-      revenueChart.data.datasets[0].data.push(newRevenue);
-      revenueChart.data.datasets[1].data.push(newProfit);
-      
-      if (revenueChart.data.datasets[0].data.length > 12) {
-        revenueChart.data.datasets[0].data.shift();
-        revenueChart.data.datasets[1].data.shift();
-        revenueChart.data.labels.shift();
-      }
-      
-      revenueChart.update('none');
-    }
-
-    // Update stats cards
-    this.updateStatsCards();
-  }
-
-  updateStatsCards() {
-    // Animate stats card values
-    const statsElements = document.querySelectorAll('[data-stat-value]');
-    statsElements.forEach(element => {
-      const currentValue = parseInt(element.textContent.replace(/[^0-9]/g, ''));
-      const newValue = currentValue + Math.floor(Math.random() * 10) - 5;
-      
-      if (newValue > 0) {
-        this.animateNumber(element, currentValue, newValue);
-      }
-    });
-  }
-
-  animateNumber(element, start, end) {
-    const duration = 1000;
-    const steps = 30;
-    const stepValue = (end - start) / steps;
-    let current = start;
-    let step = 0;
-
-    const timer = setInterval(() => {
-      current += stepValue;
-      step++;
-      
-      const formatted = Math.floor(current).toLocaleString();
-      element.textContent = element.textContent.replace(/[\d,]+/, formatted);
-      
-      if (step >= steps) {
-        clearInterval(timer);
-        const finalFormatted = end.toLocaleString();
-        element.textContent = element.textContent.replace(/[\d,]+/, finalFormatted);
-      }
-    }, duration / steps);
-  }
-
-  initInteractiveElements() {
-    // Chart period switcher
-    document.addEventListener('click', (e) => {
-      if (e.target.matches('[data-chart-period]')) {
-        const period = e.target.dataset.chartPeriod;
-        this.updateChartPeriod(period);
+    constructor() {
+        this.charts = {};
         
-        // Update active state
-        document.querySelectorAll('[data-chart-period]').forEach(btn => {
-          btn.classList.remove('active');
-        });
-        e.target.classList.add('active');
-      }
-    });
-
-    // Export functionality
-    document.addEventListener('click', (e) => {
-      if (e.target.matches('[data-export-chart]')) {
-        const chartName = e.target.dataset.exportChart;
-        this.exportChart(chartName);
-      }
-    });
-  }
-
-  updateChartPeriod(period) {
-    // Regenerate data based on period
-    switch (period) {
-      case '7d':
-        this.loadWeeklyData();
-        break;
-      case '30d':
-        this.loadMonthlyData();
-        break;
-      case '90d':
-        this.loadQuarterlyData();
-        break;
-      case '1y':
-        this.loadYearlyData();
-        break;
+        // Chỉ khởi tạo nếu đang ở trang dashboard
+        if (this.isDashboardPage()) {
+            this.init();
+        }
     }
-  }
 
-  loadWeeklyData() {
-    // Update charts with weekly data
-    console.log('Loading weekly data...');
-  }
-
-  loadMonthlyData() {
-    // Update charts with monthly data
-    console.log('Loading monthly data...');
-  }
-
-  loadQuarterlyData() {
-    // Update charts with quarterly data
-    console.log('Loading quarterly data...');
-  }
-
-  loadYearlyData() {
-    // Update charts with yearly data
-    console.log('Loading yearly data...');
-  }
-
-  exportChart(chartName) {
-    const chart = this.charts.get(chartName);
-    if (chart) {
-      const url = chart.toBase64Image();
-      const link = document.createElement('a');
-      link.download = `${chartName}-chart.png`;
-      link.href = url;
-      link.click();
+    /**
+     * Kiểm tra xem có phải trang dashboard không
+     */
+    isDashboardPage() {
+        return document.getElementById('revenue-today') !== null;
     }
-  }
 
-  destroy() {
-    this.charts.forEach(chart => chart.destroy());
-    this.charts.clear();
-  }
-} 
+    /**
+     * Khởi tạo Dashboard
+     */
+    async init() {
+        console.log('🚀 Dashboard Manager Initialized');
+        
+        try {
+            // Load tất cả dữ liệu song song để tối ưu tốc độ
+            await Promise.all([
+                this.loadSummaryStats(),
+                this.loadRevenueChart(),
+                this.loadRecentActivities(),
+                this.loadRecentOrders(),
+                this.loadOrderStatusChart(),
+                this.loadUserGrowthChart()
+            ]);
+            
+            console.log('✅ Dashboard loaded successfully');
+            this.setupRefreshButton();
+            
+        } catch (error) {
+            console.error('❌ Error loading dashboard:', error);
+            this.showError('Không thể tải dữ liệu dashboard');
+        }
+    }
+
+    // ========== HÀNG 1: THỐNG KÊ TỔNG QUAN ==========
+    async loadSummaryStats() {
+        try {
+            const data = await DashboardService.getSummaryStats();
+            
+            this.updateStatCard('revenue', data.revenue.value, data.revenue.growth, 'đ');
+            this.updateStatCard('orders', data.orders.value, data.orders.growth, '');
+            this.updateStatCard('users', data.newUsers.value, data.newUsers.growth, '');
+            this.updateStatCard('shops', data.newShops.value, data.newShops.growth, '');
+            
+        } catch (error) {
+            console.error('Error loading summary:', error);
+        }
+    }
+
+    updateStatCard(type, value, growth, suffix) {
+        const valueEl = document.getElementById(`${type}-today`);
+        const changeEl = document.getElementById(`${type}-change`);
+        
+        if (valueEl) {
+            const formattedValue = value.toLocaleString('vi-VN');
+            valueEl.textContent = suffix ? `${formattedValue} ${suffix}` : formattedValue;
+        }
+        
+        if (changeEl) {
+            const isPositive = growth >= 0;
+            const icon = isPositive ? 'bi-arrow-up' : 'bi-arrow-down';
+            const colorClass = isPositive ? 'text-success' : 'text-danger';
+            
+            changeEl.className = `${colorClass} me-1`;
+            changeEl.innerHTML = `<i class="bi ${icon}"></i> ${isPositive ? '+' : ''}${growth}%`;
+        }
+    }
+
+    // ========== HÀNG 2: BIỂU ĐỒ DOANH THU ==========
+    async loadRevenueChart() {
+        const ctx = document.getElementById('monthlyRevenueChart');
+        if (!ctx) return;
+
+        try {
+            const data = await DashboardService.getRevenueChartData();
+            
+            // Hủy chart cũ nếu có
+            if (this.charts.revenue) {
+                this.charts.revenue.destroy();
+            }
+
+            this.charts.revenue = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.months,
+                    datasets: [{
+                        label: 'Doanh thu',
+                        data: data.values,
+                        borderColor: '#4e73df',
+                        backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        pointBackgroundColor: '#4e73df',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            callbacks: {
+                                label: (context) => {
+                                    return `Doanh thu: ${context.parsed.y.toLocaleString('vi-VN')}đ`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => `${(value / 1000000).toFixed(1)}M`
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error loading revenue chart:', error);
+        }
+    }
+
+    // ========== HÀNG 2: HOẠT ĐỘNG GẦN ĐÂY ==========
+    async loadRecentActivities() {
+        const container = document.getElementById('recent-activity-list');
+        if (!container) return;
+
+        try {
+            const activities = await DashboardService.getRecentActivities(10);
+            
+            if (activities.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-3"></i>
+                        <p class="mb-0 mt-2">Chưa có hoạt động</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = activities.map(activity => `
+                <div class="activity-item border-bottom p-3">
+                    <div class="d-flex align-items-start">
+                        <div class="activity-icon me-3">
+                            <i class="bi ${this.getActivityIcon(activity.type)} text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p class="mb-1">
+                                <strong>${activity.user}</strong> ${activity.action}
+                            </p>
+                            <small class="text-muted">
+                                <i class="bi bi-clock me-1"></i>
+                                ${this.formatTime(activity.time)}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+        } catch (error) {
+            console.error('Error loading activities:', error);
+        }
+    }
+
+    getActivityIcon(type) {
+        const icons = {
+            'order': 'bi-cart-check',
+            'user': 'bi-person-plus',
+            'shop': 'bi-shop'
+        };
+        return icons[type] || 'bi-circle-fill';
+    }
+
+    formatTime(timeStr) {
+        const date = new Date(timeStr);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffMins < 1) return 'Vừa xong';
+        if (diffMins < 60) return `${diffMins} phút trước`;
+        if (diffHours < 24) return `${diffHours} giờ trước`;
+        if (diffDays < 7) return `${diffDays} ngày trước`;
+        
+        return date.toLocaleDateString('vi-VN');
+    }
+
+    // ========== HÀNG 3: ĐƠN HÀNG GẦN ĐÂY ==========
+    async loadRecentOrders() {
+        const tbody = document.getElementById('recent-orders-table');
+        if (!tbody) return;
+
+        try {
+            const orders = await DashboardService.getRecentOrders(7);
+            
+            if (orders.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-3"></i>
+                            <p class="mb-0 mt-2">Chưa có đơn hàng</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = orders.map(order => `
+                <tr>
+                    <td><strong>#${order.code}</strong></td>
+                    <td>${order.customer}</td>
+                    <td>${order.total.toLocaleString('vi-VN')}đ</td>
+                    <td>
+                        <span class="badge ${this.getStatusBadge(order.status)}">
+                            ${this.getStatusText(order.status)}
+                        </span>
+                    </td>
+                    <td>${new Date(order.createdAt).toLocaleDateString('vi-VN')}</td>
+                </tr>
+            `).join('');
+            
+        } catch (error) {
+            console.error('Error loading orders:', error);
+        }
+    }
+
+    getStatusBadge(status) {
+        const badges = {
+            'processing': 'bg-warning',
+            'shipping': 'bg-info',
+            'arrived': 'bg-primary',
+            'delivered': 'bg-success',
+            'cancelled': 'bg-danger',
+            'refunded': 'bg-secondary'
+        };
+        return badges[status] || 'bg-secondary';
+    }
+
+    getStatusText(status) {
+        const texts = {
+            'processing': 'Đang xử lý',
+            'shipping': 'Đang giao',
+            'arrived': 'Đã đến',
+            'delivered': 'Đã giao',
+            'cancelled': 'Đã hủy',
+            'refund_pending': 'Chờ hoàn',
+            'refunded': 'Đã hoàn'
+        };
+        return texts[status] || status;
+    }
+
+    // ========== HÀNG 3: BIỂU ĐỒ TRẠNG THÁI ==========
+    async loadOrderStatusChart() {
+        const ctx = document.getElementById('orderStatusChart');
+        if (!ctx) return;
+
+        try {
+            const data = await DashboardService.getOrderStatusDistribution();
+            
+            if (this.charts.status) {
+                this.charts.status.destroy();
+            }
+
+            this.charts.status = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.values,
+                        backgroundColor: [
+                            '#4e73df',
+                            '#1cc88a',
+                            '#36b9cc',
+                            '#f6c23e',
+                            '#e74a3b',
+                            '#858796'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error loading status chart:', error);
+        }
+    }
+
+    // ========== HÀNG 4: TĂNG TRƯỞNG NGƯỜI DÙNG ==========
+    async loadUserGrowthChart() {
+        const ctx = document.getElementById('accountGrowthChart');
+        if (!ctx) return;
+
+        try {
+            const data = await DashboardService.getUserGrowthData();
+            
+            if (this.charts.userGrowth) {
+                this.charts.userGrowth.destroy();
+            }
+
+            this.charts.userGrowth = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.days,
+                    datasets: [{
+                        label: 'Người dùng mới',
+                        data: data.values,
+                        backgroundColor: '#36b9cc',
+                        borderRadius: 4,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    }
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error loading user growth chart:', error);
+        }
+    }
+
+    // ========== UTILITIES ==========
+    setupRefreshButton() {
+        const refreshBtn = document.querySelector('[title="Refresh data"]');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                console.log('🔄 Refreshing dashboard...');
+                this.init();
+            });
+        }
+    }
+
+    showError(message) {
+        console.error(message);
+        // Có thể thêm toast notification ở đây
+    }
+}
