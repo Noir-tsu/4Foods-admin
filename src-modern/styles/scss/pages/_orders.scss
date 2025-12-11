@@ -1,252 +1,459 @@
-// ==========================================================================
-// Orders Page Styles
-// ==========================================================================
+// styles/orders.scss
+// Orders Page Specific Styles
 
-// Order management specific styles
-.order-management {
+.orders-page {
+  
+  // Stats Cards
   .stats-card {
-    @include stats-card-hover();
-  }
-
-  .stats-icon {
-    @include stats-icon();
-  }
-
-  @include order-status-badges();
-
-  .chart-container {
-    @include chart-container(300px, 350px);
-  }
-
-  .order-timeline {
-    position: relative;
-    padding-left: 2rem;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0.75rem;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background-color: var(--bs-border-color);
-    }
-
-    .timeline-item {
-      position: relative;
-      margin-bottom: 1.5rem;
-
-      &::before {
-        content: '';
-        position: absolute;
-        left: -1.6rem;
-        top: 0.25rem;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background-color: var(--bs-primary);
-        border: 2px solid var(--bs-body-bg);
-      }
-
-      &.completed::before {
-        background-color: var(--bs-success);
-      }
-
-      &.pending::before {
-        background-color: var(--bs-warning);
-      }
-
-      &.cancelled::before {
-        background-color: var(--bs-danger);
-      }
-    }
-  }
-
-  .order-summary-card {
-    background: var(--bs-light);
-    border: 1px solid var(--bs-border-color);
-    border-radius: var(--bs-border-radius);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
     padding: 1.5rem;
-
-    .summary-item {
+    background: white;
+    
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-icon {
+      width: 48px;
+      height: 48px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid var(--bs-border-color);
-
-      &:last-child {
-        border-bottom: none;
-        font-weight: 600;
-        font-size: 1.1rem;
-      }
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
+      color: #1f2937;
+    }
+    
+    p {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin: 0;
     }
   }
 
-  .customer-info {
+  // Order Customer Info
+  .order-customer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    
     .customer-avatar {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       object-fit: cover;
-      margin-right: 0.75rem;
+      border: 2px solid #f3f4f6;
     }
-
-    .customer-details {
-      .customer-name {
-        font-weight: 500;
-        margin-bottom: 0.25rem;
-      }
-
-      .customer-email {
-        color: var(--bs-secondary-color);
-        font-size: 0.875rem;
-      }
+    
+    .fw-medium {
+      font-weight: 500;
+      color: #1f2937;
     }
   }
 
+  // Order Items
   .order-items {
-    .item-row {
-      padding: 0.75rem 0;
-      border-bottom: 1px solid var(--bs-border-color);
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      .item-details {
-        .item-name {
-          font-weight: 500;
-          margin-bottom: 0.25rem;
-        }
-
-        .item-sku {
-          color: var(--bs-secondary-color);
-          font-size: 0.875rem;
-          font-family: monospace;
-        }
-      }
-
-      .item-quantity {
-        background: var(--bs-secondary-bg);
-        padding: 0.25rem 0.5rem;
-        border-radius: var(--bs-border-radius-sm);
-        font-weight: 500;
-        min-width: 40px;
-        text-align: center;
-      }
-
-      .item-price {
-        font-weight: 600;
-        color: var(--bs-success);
-      }
+    .text-muted {
+      font-size: 0.875rem;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
-  .order-actions {
-    .btn {
-      @include button-hover-lift();
+  // Order Status Badges
+  .order-status {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+    display: inline-block;
+    white-space: nowrap;
+    
+    &.status-processing {
+      background-color: #fff7cd;
+      color: #997404;
+    }
+    
+    &.status-shipping {
+      background-color: #cff4fc;
+      color: #055160;
+    }
+    
+    &.status-arrived {
+      background-color: #cfe2ff;
+      color: #084298;
+    }
+    
+    &.status-delivered {
+      background-color: #d1e7dd;
+      color: #0f5132;
+    }
+    
+    &.status-cancelled {
+      background-color: #f8d7da;
+      color: #842029;
+    }
+    
+    &.status-refund_pending {
+      background-color: #fff3cd;
+      color: #664d03;
+    }
+    
+    &.status-refunded {
+      background-color: #e2e3e5;
+      color: #41464b;
     }
   }
 
-  .shipping-info {
-    background: var(--bs-info-bg-subtle);
-    border: 1px solid var(--bs-info-border-subtle);
-    border-radius: var(--bs-border-radius);
+  // Sortable Table Headers
+  .sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 20px !important;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+    
+    &::after {
+      content: '⇅';
+      position: absolute;
+      right: 8px;
+      opacity: 0.3;
+      font-size: 12px;
+    }
+  }
+
+  // Bulk Actions Bar
+  .bulk-actions-bar {
+    background-color: #f8f9fa;
     padding: 1rem;
-
-    .shipping-address {
-      font-style: normal;
-      line-height: 1.4;
+    border-bottom: 1px solid #e5e7eb;
+    animation: slideDown 0.3s ease;
+    
+    .btn-group {
+      gap: 0.5rem;
     }
   }
 
-  .order-filter {
-    background: var(--bs-secondary-bg);
-    border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid var(--bs-border-color);
-  }
-
-  .export-options {
-    .export-btn {
-      @include button-hover-lift();
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 
-  // Simple table checkbox styling for order selection
+  // Table Enhancements
   .table {
-    input[type="checkbox"].form-check-input {
-      width: 16px !important;
-      height: 16px !important;
-      border: 1px solid var(--bs-border-color) !important;
-      border-radius: 3px !important;
-      background: var(--bs-body-bg) !important;
-      transition: all var(--transition-fast) !important;
-      margin: 0 !important;
-      appearance: none !important;
-      -webkit-appearance: none !important;
-      -moz-appearance: none !important;
-      background-size: contain !important;
-      background-repeat: no-repeat !important;
-      background-position: center !important;
-      position: relative !important;
-      z-index: 1 !important;
-
-      // Remove any pseudo-elements from Bootstrap
-      &::before,
-      &::after {
-        display: none !important;
-        content: none !important;
-      }
-
-      &:checked {
-        background-color: var(--bs-primary) !important;
-        border-color: var(--bs-primary) !important;
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e") !important;
-
-        // Remove any checked pseudo-elements
-        &::before,
-        &::after {
-          display: none !important;
-          content: none !important;
-        }
-      }
-
-      &:focus {
-        box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25) !important;
-        border-color: var(--bs-primary) !important;
-        outline: none !important;
-      }
-
+    > thead > tr > th {
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #6b7280;
+      border-bottom: 2px solid #e5e7eb;
+      padding: 1rem 0.75rem;
+      background-color: #f9fafb;
+    }
+    
+    > tbody > tr {
+      transition: background-color 0.2s;
+      
       &:hover {
-        border-color: var(--bs-primary) !important;
+        background-color: #f9fafb;
       }
+      
+      > td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f3f4f6;
+      }
+    }
+  }
 
-      // Remove any indeterminate styling
-      &:indeterminate {
-        background-image: none !important;
-        background-color: var(--bs-primary) !important;
-        border-color: var(--bs-primary) !important;
+  // Chart Containers
+  .card {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    
+    .card-header {
+      background-color: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1rem 1.25rem;
+      border-radius: 12px 12px 0 0;
+      
+      .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+      }
+    }
+    
+    .card-body {
+      padding: 1.25rem;
+    }
+  }
 
-        &::before,
-        &::after {
-          display: none !important;
-          content: none !important;
+  // Timeframe Selector
+  .btn-group {
+    .btn-check:checked + .btn {
+      background-color: var(--bs-primary, #6366f1);
+      border-color: var(--bs-primary, #6366f1);
+      color: white;
+    }
+    
+    label.btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  // Status Legend
+  #status-legend {
+    .badge {
+      padding: 0;
+      border-radius: 50%;
+    }
+    
+    .text-sm {
+      font-size: 0.875rem;
+    }
+  }
+
+  // Pagination
+  .pagination {
+    margin-bottom: 0;
+    
+    .page-item {
+      margin: 0 2px;
+      
+      &.active .page-link {
+        background-color: var(--bs-primary, #6366f1);
+        border-color: var(--bs-primary, #6366f1);
+        color: white;
+      }
+      
+      &.disabled .page-link {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+    }
+    
+    .page-link {
+      color: #6b7280;
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      
+      &:hover:not(.disabled) {
+        background-color: #f3f4f6;
+        border-color: #d1d5db;
+        color: #1f2937;
+      }
+      
+      &:focus {
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+      }
+    }
+  }
+
+  // Search Input
+  .position-relative {
+    .form-control {
+      padding-right: 2.5rem;
+      border-radius: 8px;
+      
+      &:focus {
+        border-color: var(--bs-primary, #6366f1);
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+      }
+    }
+    
+    .bi-search {
+      pointer-events: none;
+      color: #9ca3af;
+    }
+  }
+
+  // Filter Controls
+  .form-select {
+    border-radius: 8px;
+    
+    &:focus {
+      border-color: var(--bs-primary, #6366f1);
+      box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+    }
+  }
+
+  // Dropdown Menu
+  .dropdown-menu {
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem;
+    
+    .dropdown-item {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      transition: background-color 0.2s;
+      border-radius: 6px;
+      
+      &:hover {
+        background-color: #f3f4f6;
+      }
+      
+      &.text-danger:hover {
+        background-color: #fee2e2;
+        color: #dc2626;
+      }
+      
+      i {
+        width: 20px;
+        display: inline-block;
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  // Loading State
+  .spinner-border {
+    width: 2rem;
+    height: 2rem;
+    border-width: 0.2em;
+  }
+
+  // Empty State
+  .empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+    
+    i {
+      font-size: 4rem;
+      color: #d1d5db;
+      margin-bottom: 1rem;
+    }
+    
+    p {
+      color: #6b7280;
+      margin: 0;
+      font-size: 1rem;
+    }
+  }
+
+  // Filter Pills
+  .filter-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    
+    .filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0.75rem;
+      background-color: #f3f4f6;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      color: #4b5563;
+      
+      .remove-filter {
+        cursor: pointer;
+        color: #6b7280;
+        font-weight: bold;
+        
+        &:hover {
+          color: #ef4444;
         }
       }
     }
+  }
 
-    // Also target any wrapper elements that might have overlays
-    .form-check {
-      position: relative !important;
-
-      &::before,
-      &::after {
-        display: none !important;
-        content: none !important;
+  // Responsive Adjustments
+  @media (max-width: 768px) {
+    .stats-card {
+      .stats-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
       }
+      
+      h3 {
+        font-size: 1.5rem;
+      }
+    }
+    
+    .table {
+      font-size: 0.875rem;
+      
+      > thead > tr > th,
+      > tbody > tr > td {
+        padding: 0.75rem 0.5rem;
+      }
+    }
+    
+    .order-customer {
+      flex-direction: column;
+      align-items: flex-start;
+      
+      .customer-avatar {
+        width: 32px;
+        height: 32px;
+      }
+    }
+    
+    .btn-group {
+      flex-direction: column;
+      
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+
+  // Print Styles
+  @media print {
+    .sidebar,
+    .content-header,
+    .bulk-actions-bar,
+    .pagination,
+    .btn,
+    .dropdown,
+    .form-control,
+    .form-select {
+      display: none !important;
+    }
+    
+    .main-content {
+      margin-left: 0 !important;
+      padding: 0 !important;
+    }
+    
+    .table {
+      font-size: 0.75rem;
     }
   }
 }

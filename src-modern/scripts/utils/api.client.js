@@ -57,6 +57,47 @@ class ApiClient {
             throw error;
         }
     }
+
+    async put(endpoint, data = {}) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('❌ API PUT Request Failed:', error);
+            throw error;
+        }
+    }
+
+    async delete(endpoint) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('❌ API DELETE Request Failed:', error);
+            throw error;
+        }
+    }
 }
 
 export const apiClient = new ApiClient(API_CONFIG.BASE_URL);

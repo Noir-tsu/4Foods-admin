@@ -1,810 +1,619 @@
-import Alpine from 'alpinejs';
+// src-modern/scripts/components/orders.js
+import ApexCharts from 'apexcharts';
+import { OrdersService } from '../utils/services/orders.service.js';
 
-document.addEventListener('alpine:init', () => {
-  Alpine.data('orderTable', () => ({
-    orders: [],
-    filteredOrders: [],
-    selectedOrders: [],
-    currentPage: 1,
-    itemsPerPage: 10,
-    searchQuery: '',
-    statusFilter: '',
-    dateFilter: '',
-    sortField: 'orderNumber',
-    sortDirection: 'desc',
-    isLoading: false,
-    chartsInitialized: false,
+export class OrdersManager {
+    constructor() {
+        this.charts = {};
+        this.data = {
+            // Stats
+            totalOrders: 0,
+            todayOrders: 0,
+            todayRevenue: 0,
 
-    // Statistics
-    stats: {
-      total: 0,
-      pending: 0,
-      shipped: 0,
-      revenue: 0
-    },
+            // Charts
+            trends: {
+                categories: [],
+                series: []
+            },
+            statusDistribution: [],
 
-    statusStats: [],
+            // Table
+            ordersList: [],
+            pagination: null
+        };
 
-    init() {
-      this.loadSampleData();
-      this.filterOrders();
-      this.calculateStats();
-      
-      // Delay chart initialization to ensure DOM is fully ready
-      setTimeout(() => {
-        this.initCharts();
-      }, 500);
-    },
+        this.selectedOrders = new Set();
+        this.filters = {
+            search: '',
+            status: '',
+            paymentMethod: '',
+            startDate: '',
+            endDate: ''
+        };
+        this.currentPage = 1;
 
-    loadSampleData() {
-      this.orders = [
-        {
-          id: 1,
-          orderNumber: 'ORD-2025-001',
-          customer: {
-            name: 'John Smith',
-            email: 'john@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'iPhone 14 Pro', quantity: 1, price: 999.99 }
-          ],
-          itemCount: 1,
-          total: 999.99,
-          status: 'pending',
-          orderDate: '2025-01-15',
-          shippingAddress: '123 Main St, City, State 12345'
-        },
-        {
-          id: 2,
-          orderNumber: 'ORD-2025-002',
-          customer: {
-            name: 'Sarah Johnson',
-            email: 'sarah@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'MacBook Air M2', quantity: 1, price: 1199.99 },
-            { name: 'Wireless Mouse', quantity: 1, price: 49.99 }
-          ],
-          itemCount: 2,
-          total: 1249.98,
-          status: 'processing',
-          orderDate: '2025-01-14',
-          shippingAddress: '456 Oak Ave, City, State 67890'
-        },
-        {
-          id: 3,
-          orderNumber: 'ORD-2025-003',
-          customer: {
-            name: 'Mike Davis',
-            email: 'mike@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Cotton T-Shirt', quantity: 3, price: 24.99 }
-          ],
-          itemCount: 3,
-          total: 74.97,
-          status: 'shipped',
-          orderDate: '2025-01-13',
-          shippingAddress: '789 Pine St, City, State 54321'
-        },
-        {
-          id: 4,
-          orderNumber: 'ORD-2025-004',
-          customer: {
-            name: 'Emily Brown',
-            email: 'emily@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'JavaScript Guide', quantity: 1, price: 39.99 },
-            { name: 'Python Cookbook', quantity: 1, price: 44.99 }
-          ],
-          itemCount: 2,
-          total: 84.98,
-          status: 'delivered',
-          orderDate: '2025-01-12',
-          shippingAddress: '321 Elm St, City, State 13579'
-        },
-        {
-          id: 5,
-          orderNumber: 'ORD-2025-005',
-          customer: {
-            name: 'David Wilson',
-            email: 'david@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Wireless Headphones', quantity: 1, price: 149.99 }
-          ],
-          itemCount: 1,
-          total: 149.99,
-          status: 'cancelled',
-          orderDate: '2025-01-11',
-          shippingAddress: '654 Maple Dr, City, State 24680'
-        },
-        {
-          id: 6,
-          orderNumber: 'ORD-2025-006',
-          customer: {
-            name: 'Lisa Anderson',
-            email: 'lisa@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Smart Home Hub', quantity: 1, price: 199.99 },
-            { name: 'Smart Bulbs', quantity: 4, price: 19.99 }
-          ],
-          itemCount: 5,
-          total: 279.95,
-          status: 'processing',
-          orderDate: '2025-01-10',
-          shippingAddress: '987 Cedar Ln, City, State 97531'
-        },
-        {
-          id: 7,
-          orderNumber: 'ORD-2025-007',
-          customer: {
-            name: 'Robert Martinez',
-            email: 'robert@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Samsung Galaxy S24', quantity: 1, price: 899.99 }
-          ],
-          itemCount: 1,
-          total: 899.99,
-          status: 'pending',
-          orderDate: '2025-01-09',
-          shippingAddress: '456 Valley Rd, City, State 11223'
-        },
-        {
-          id: 8,
-          orderNumber: 'ORD-2025-008',
-          customer: {
-            name: 'Jennifer Taylor',
-            email: 'jennifer@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Yoga Mat Premium', quantity: 2, price: 49.99 },
-            { name: 'Winter Jacket', quantity: 1, price: 189.99 }
-          ],
-          itemCount: 3,
-          total: 289.97,
-          status: 'shipped',
-          orderDate: '2025-01-08',
-          shippingAddress: '789 Mountain View Dr, City, State 44556'
-        },
-        {
-          id: 9,
-          orderNumber: 'ORD-2025-009',
-          customer: {
-            name: 'Christopher Lee',
-            email: 'chris@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'React Handbook', quantity: 1, price: 54.99 },
-            { name: 'Node.js Complete Guide', quantity: 1, price: 59.99 },
-            { name: 'Docker Deep Dive', quantity: 1, price: 49.99 }
-          ],
-          itemCount: 3,
-          total: 164.97,
-          status: 'delivered',
-          orderDate: '2025-01-07',
-          shippingAddress: '123 Tech Street, City, State 77889'
-        },
-        {
-          id: 10,
-          orderNumber: 'ORD-2025-010',
-          customer: {
-            name: 'Amanda Clark',
-            email: 'amanda@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Gaming Mouse RGB', quantity: 1, price: 79.99 },
-            { name: 'Mechanical Keyboard', quantity: 1, price: 159.99 }
-          ],
-          itemCount: 2,
-          total: 239.98,
-          status: 'processing',
-          orderDate: '2025-01-06',
-          shippingAddress: '321 Gaming Ave, City, State 99001'
-        },
-        {
-          id: 11,
-          orderNumber: 'ORD-2025-011',
-          customer: {
-            name: 'Daniel Rodriguez',
-            email: 'daniel@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Coffee Maker Deluxe', quantity: 1, price: 249.99 }
-          ],
-          itemCount: 1,
-          total: 249.99,
-          status: 'pending',
-          orderDate: '2025-01-05',
-          shippingAddress: '654 Coffee St, City, State 33445'
-        },
-        {
-          id: 12,
-          orderNumber: 'ORD-2025-012',
-          customer: {
-            name: 'Michelle White',
-            email: 'michelle@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Running Shoes', quantity: 1, price: 129.99 },
-            { name: 'Casual Polo Shirt', quantity: 2, price: 39.99 }
-          ],
-          itemCount: 3,
-          total: 209.97,
-          status: 'shipped',
-          orderDate: '2025-01-04',
-          shippingAddress: '987 Sports Blvd, City, State 55667'
-        },
-        {
-          id: 13,
-          orderNumber: 'ORD-2025-013',
-          customer: {
-            name: 'Kevin Thompson',
-            email: 'kevin@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Tablet Pro 12.9"', quantity: 1, price: 1099.99 }
-          ],
-          itemCount: 1,
-          total: 1099.99,
-          status: 'delivered',
-          orderDate: '2025-01-03',
-          shippingAddress: '147 Tech Plaza, City, State 88990'
-        },
-        {
-          id: 14,
-          orderNumber: 'ORD-2025-014',
-          customer: {
-            name: 'Rachel Garcia',
-            email: 'rachel@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Garden Planter Set', quantity: 1, price: 89.99 },
-            { name: 'Desk Organizer', quantity: 2, price: 34.99 }
-          ],
-          itemCount: 3,
-          total: 159.97,
-          status: 'processing',
-          orderDate: '2025-01-02',
-          shippingAddress: '258 Garden Way, City, State 22334'
-        },
-        {
-          id: 15,
-          orderNumber: 'ORD-2025-015',
-          customer: {
-            name: 'Steven Hall',
-            email: 'steven@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'AI & Machine Learning', quantity: 1, price: 79.99 }
-          ],
-          itemCount: 1,
-          total: 79.99,
-          status: 'pending',
-          orderDate: '2025-01-01',
-          shippingAddress: '369 Learning Lane, City, State 66778'
-        },
-        {
-          id: 16,
-          orderNumber: 'ORD-2024-050',
-          customer: {
-            name: 'Nicole Allen',
-            email: 'nicole@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Wireless Headphones', quantity: 2, price: 149.99 }
-          ],
-          itemCount: 2,
-          total: 299.98,
-          status: 'delivered',
-          orderDate: '2024-12-30',
-          shippingAddress: '741 Audio Street, City, State 99887'
-        },
-        {
-          id: 17,
-          orderNumber: 'ORD-2024-049',
-          customer: {
-            name: 'Anthony Young',
-            email: 'anthony@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Cotton T-Shirt', quantity: 5, price: 24.99 }
-          ],
-          itemCount: 5,
-          total: 124.95,
-          status: 'shipped',
-          orderDate: '2024-12-29',
-          shippingAddress: '852 Fashion Ave, City, State 11229'
-        },
-        {
-          id: 18,
-          orderNumber: 'ORD-2024-048',
-          customer: {
-            name: 'Patricia King',
-            email: 'patricia@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Kitchen Knife Set', quantity: 1, price: 129.99 },
-            { name: 'Coffee Maker Deluxe', quantity: 1, price: 249.99 }
-          ],
-          itemCount: 2,
-          total: 379.98,
-          status: 'processing',
-          orderDate: '2024-12-28',
-          shippingAddress: '963 Kitchen Rd, City, State 44556'
-        },
-        {
-          id: 19,
-          orderNumber: 'ORD-2024-047',
-          customer: {
-            name: 'Joshua Wright',
-            email: 'joshua@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'Smart Home Hub', quantity: 1, price: 199.99 },
-            { name: 'Gaming Mouse RGB', quantity: 1, price: 79.99 }
-          ],
-          itemCount: 2,
-          total: 279.98,
-          status: 'cancelled',
-          orderDate: '2024-12-27',
-          shippingAddress: '147 Smart Home Dr, City, State 77889'
-        },
-        {
-          id: 20,
-          orderNumber: 'ORD-2024-046',
-          customer: {
-            name: 'Laura Lopez',
-            email: 'laura@example.com',
-            avatar: '/assets/images/avatar-placeholder.svg'
-          },
-          items: [
-            { name: 'MacBook Air M2', quantity: 1, price: 1199.99 }
-          ],
-          itemCount: 1,
-          total: 1199.99,
-          status: 'delivered',
-          orderDate: '2024-12-26',
-          shippingAddress: '456 Tech Center, City, State 33221'
+        // Expose to window for inline handlers
+        window.ordersManager = this;
+
+        // Initialize if on orders page
+        if (document.getElementById('total-orders-count')) {
+            this.init();
         }
-      ];
-    },
+    }
 
-    calculateStats() {
-      this.stats.total = this.orders.length;
-      this.stats.pending = this.orders.filter(o => o.status === 'pending').length;
-      this.stats.shipped = this.orders.filter(o => o.status === 'shipped').length;
-      this.stats.revenue = this.orders
-        .filter(o => o.status !== 'cancelled')
-        .reduce((sum, o) => sum + o.total, 0);
+    async init() {
+        console.log('🚀 Orders Manager Initialized');
+        try {
+            await Promise.all([
+                this.loadStats().catch(e => console.error('Stats error:', e)),
+                this.loadTrends().catch(e => console.error('Trends error:', e)),
+                this.loadStatusDistribution().catch(e => console.error('Distribution error:', e)),
+                this.loadOrdersList().catch(e => console.error('Orders list error:', e))
+            ]);
 
-      // Calculate status distribution
-      const statuses = {};
-      this.orders.forEach(order => {
-        statuses[order.status] = (statuses[order.status] || 0) + 1;
-      });
+            await this.$nextTick();
+            this.renderUI();
+            this.setupEventListeners();
+            console.log('✅ Orders page loaded successfully');
+        } catch (error) {
+            console.error('❌ Fatal error loading orders:', error);
+        }
+    }
 
-      this.statusStats = Object.entries(statuses).map(([name, count]) => ({
-        name: name.charAt(0).toUpperCase() + name.slice(1),
-        count,
-        percentage: Math.round((count / this.orders.length) * 100),
-        color: this.getStatusColor(name)
-      }));
-    },
+    $nextTick() {
+        return new Promise(resolve => setTimeout(resolve, 100));
+    }
 
-    getStatusColor(status) {
-      const colors = {
-        pending: '#ffc107',
-        processing: '#0d6efd',
-        shipped: '#17a2b8',
-        delivered: '#28a745',
-        cancelled: '#dc3545'
-      };
-      return colors[status] || '#6c757d';
-    },
+    // ==================== DATA LOADING ====================
 
-    filterOrders() {
-      this.filteredOrders = this.orders.filter(order => {
-        const matchesSearch = !this.searchQuery || 
-          order.orderNumber.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          order.customer.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          order.customer.email.toLowerCase().includes(this.searchQuery.toLowerCase());
+    async loadStats() {
+        try {
+            const stats = await OrdersService.getStats();
+            this.data.totalOrders = stats.totalOrders || 0;
+            this.data.todayOrders = stats.todayOrders || 0;
+            this.data.todayRevenue = stats.todayRevenue || 0;
+        } catch (error) {
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    async loadTrends() {
+        try {
+            this.data.trends = await OrdersService.getTrends();
+        } catch (error) {
+            console.error('Error loading trends:', error);
+        }
+    }
+
+    async loadStatusDistribution() {
+        try {
+            this.data.statusDistribution = await OrdersService.getStatusDistribution();
+        } catch (error) {
+            console.error('Error loading status distribution:', error);
+        }
+    }
+
+    async loadOrdersList() {
+        try {
+            const params = {
+                page: this.currentPage,
+                limit: 10,
+                ...this.filters
+            };
+            const response = await OrdersService.getOrdersList(params);
+            this.data.ordersList = response.orders;
+            this.data.pagination = response.pagination;
+        } catch (error) {
+            console.error('Error loading orders list:', error);
+        }
+    }
+
+    // ==================== RENDERING ====================
+
+    renderUI() {
+        this.renderStats();
+        this.renderTrendsChart();
+        this.renderStatusChart();
+        this.renderOrdersList();
+        this.populateStatusFilter();
+    }
+
+    renderStats() {
+        this.setText('total-orders-count', this.data.totalOrders.toLocaleString());
+        this.setText('today-orders-count', this.data.todayOrders.toLocaleString());
+        this.setText('today-revenue-amount', `${this.data.todayRevenue.toLocaleString('vi-VN')}₫`);
+    }
+
+    renderTrendsChart() {
+        const chartEl = document.getElementById('orderTrendsChart');
+        if (!chartEl) return;
+
+        if (this.charts.trends) this.charts.trends.destroy();
+
+        const { categories, series } = this.data.trends;
+
+        if (!series || series.length === 0) {
+            chartEl.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+                    <p class="mb-0">Chưa có dữ liệu đơn hàng</p>
+                </div>
+            `;
+            return;
+        }
+
+        const options = {
+            series: [{
+                name: 'Đơn hàng',
+                data: series
+            }],
+            chart: {
+                type: 'area',
+                height: 350,
+                toolbar: { show: false },
+                background: 'transparent'
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            colors: ['#0d6efd'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.7,
+                    opacityTo: 0.2,
+                }
+            },
+            dataLabels: { enabled: false },
+            xaxis: {
+                categories: categories,
+                labels: {
+                    style: { colors: '#6c757d' }
+                }
+            },
+            yaxis: {
+                labels: {
+                    formatter: (val) => Math.round(val),
+                    style: { colors: '#6c757d' }
+                }
+            },
+            grid: {
+                borderColor: '#2d3748'
+            },
+            tooltip: {
+                y: {
+                    formatter: (val) => `${val} đơn hàng`
+                },
+                theme: 'dark'
+            }
+        };
+
+        this.charts.trends = new ApexCharts(chartEl, options);
+        this.charts.trends.render();
+    }
+
+    renderStatusChart() {
+        const chartEl = document.getElementById('orderStatusChart');
+        if (!chartEl) return;
+
+        if (this.charts.status) this.charts.status.destroy();
+
+        if (this.data.statusDistribution.length === 0) {
+            chartEl.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <p class="mb-0">Chưa có dữ liệu</p>
+                </div>
+            `;
+            return;
+        }
+
+        const labels = this.data.statusDistribution.map(d => this.getStatusText(d._id));
+        const series = this.data.statusDistribution.map(d => d.count);
+
+        const options = {
+            series: series,
+            chart: {
+                type: 'donut',
+                height: 350,
+                background: 'transparent'
+            },
+            labels: labels,
+            colors: ['#ffc107', '#0dcaf0', '#20c997', '#198754', '#dc3545', '#6c757d', '#6610f2'],
+            legend: {
+                position: 'bottom',
+                fontSize: '12px',
+                labels: { colors: '#fff' }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: (val) => `${val.toFixed(1)}%`,
+                style: {
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    colors: ['#fff']
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: (val) => `${val} đơn`
+                },
+                theme: 'dark'
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '65%'
+                    }
+                }
+            }
+        };
+
+        this.charts.status = new ApexCharts(chartEl, options);
+        this.charts.status.render();
+    }
+
+    renderOrdersList() {
+        const tbody = document.getElementById('orders-list-tbody');
+        if (!tbody) return;
+
+        if (this.data.ordersList.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                        Không tìm thấy đơn hàng nào
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = this.data.ordersList.map(order => `
+            <tr class="${this.selectedOrders.has(order._id) ? 'table-active' : ''}">
+                <td>
+                    <input type="checkbox" 
+                           class="form-check-input order-checkbox" 
+                           value="${order._id}"
+                           ${this.selectedOrders.has(order._id) ? 'checked' : ''}>
+                </td>
+                <td>
+                    <a href="#" class="text-primary fw-bold" onclick="window.ordersManager.viewOrder('${order._id}'); return false;">
+                        #${order._id.slice(-6).toUpperCase()}
+                    </a>
+                </td>
+                <td>
+                    <div>
+                        <div class="fw-medium text-white">${order.user?.fullname || 'Khách vãng lai'}</div>
+                        <small class="text-muted">${order.user?.phone || ''}</small>
+                    </div>
+                </td>
+                <td>
+                    <div>${this.renderOrderItems(order.items)}</div>
+                </td>
+                <td class="text-white">${order.total.toLocaleString('vi-VN')}₫</td>
+                <td>${this.renderStatusBadge(order.status)}</td>
+                <td>
+                    <div class="text-muted small">
+                        ${new Date(order.createdAt).toLocaleDateString('vi-VN')}
+                        <br>
+                        ${new Date(order.createdAt).toLocaleTimeString('vi-VN')}
+                    </div>
+                </td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="#" 
+                                   onclick="window.ordersManager.viewOrder('${order._id}'); return false;">
+                                    <i class="bi bi-eye me-2"></i>Xem chi tiết
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#" 
+                                   onclick="window.ordersManager.updateStatus('${order._id}', 'shipping'); return false;">
+                                    <i class="bi bi-truck me-2"></i>Đang giao
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" 
+                                   onclick="window.ordersManager.updateStatus('${order._id}', 'delivered'); return false;">
+                                    <i class="bi bi-check-circle me-2"></i>Đã giao
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" 
+                                   onclick="window.ordersManager.updateStatus('${order._id}', 'cancelled'); return false;">
+                                    <i class="bi bi-x-circle me-2"></i>Hủy đơn
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+        this.renderPagination();
+    }
+
+    renderOrderItems(items) {
+        if (!items || items.length === 0) return '<span class="text-muted">-</span>';
         
-        const matchesStatus = !this.statusFilter || order.status === this.statusFilter;
+        const firstItem = items[0];
+        const remaining = items.length - 1;
         
-        const matchesDate = !this.dateFilter || this.matchesDateFilter(order.orderDate);
+        return `
+            <div class="d-flex align-items-center">
+                <img src="${firstItem.product?.images?.[0] || '/assets/icons/icon-192.png'}" 
+                     class="rounded me-2" 
+                     width="30" height="30" 
+                     style="object-fit: cover;"
+                     alt="${firstItem.name}"
+                     onerror="this.src='/assets/icons/icon-192.png'">
+                <div>
+                    <div class="small text-white">${firstItem.name}</div>
+                    ${remaining > 0 ? `<small class="text-muted">+${remaining} sản phẩm khác</small>` : ''}
+                </div>
+            </div>
+        `;
+    }
 
-        return matchesSearch && matchesStatus && matchesDate;
-      });
+    renderStatusBadge(status) {
+        const statusConfig = {
+            'processing': { class: 'bg-warning text-dark', text: 'Đang xử lý' },
+            'shipping': { class: 'bg-info', text: 'Đang giao' },
+            'arrived': { class: 'bg-primary', text: 'Đã đến' },
+            'delivered': { class: 'bg-success', text: 'Đã giao' },
+            'cancelled': { class: 'bg-danger', text: 'Đã hủy' },
+            'refund_pending': { class: 'bg-secondary', text: 'Chờ hoàn tiền' },
+            'refunded': { class: 'bg-dark', text: 'Đã hoàn tiền' }
+        };
 
-      this.sortOrders();
-      this.currentPage = 1;
-    },
+        const config = statusConfig[status] || { class: 'bg-secondary', text: status };
+        return `<span class="badge ${config.class}">${config.text}</span>`;
+    }
 
-    matchesDateFilter(orderDate) {
-      const today = new Date();
-      const orderDateObj = new Date(orderDate);
-      
-      switch (this.dateFilter) {
-        case 'today':
-          return orderDateObj.toDateString() === today.toDateString();
-        case 'week':
-          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-          return orderDateObj >= weekAgo;
-        case 'month':
-          const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-          return orderDateObj >= monthAgo;
-        default:
-          return true;
-      }
-    },
+    renderPagination() {
+        const paginationInfo = document.getElementById('pagination-info');
+        const paginationNav = document.getElementById('pagination-nav');
 
-    sortOrders() {
-      this.filteredOrders.sort((a, b) => {
-        let aVal = a[this.sortField];
-        let bVal = b[this.sortField];
+        if (!this.data.pagination) return;
 
-        if (this.sortField === 'total') {
-          aVal = parseFloat(aVal);
-          bVal = parseFloat(bVal);
-        } else if (this.sortField === 'orderDate') {
-          aVal = new Date(aVal);
-          bVal = new Date(bVal);
-        } else {
-          aVal = aVal.toString().toLowerCase();
-          bVal = bVal.toString().toLowerCase();
+        const { currentPage, totalPages, totalItems, limit } = this.data.pagination;
+        const start = (currentPage - 1) * limit + 1;
+        const end = Math.min(currentPage * limit, totalItems);
+
+        if (paginationInfo) {
+            paginationInfo.textContent = `Showing ${start} to ${end} of ${totalItems} results`;
         }
 
-        if (this.sortDirection === 'asc') {
-          return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-        } else {
-          return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+        if (paginationNav) {
+            let html = `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage - 1}">Previous</a>
+                </li>
+            `;
+
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                html += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>
+                `;
+            }
+
+            html += `
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" data-page="${currentPage + 1}">Next</a>
+                </li>
+            `;
+
+            paginationNav.innerHTML = html;
+
+            // Bind pagination click events
+            paginationNav.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetPage = parseInt(e.target.dataset.page);
+                    if (!isNaN(targetPage)) {
+                        this.goToPage(targetPage);
+                    }
+                });
+            });
         }
-      });
-    },
+    }
 
-    sortBy(field) {
-      if (this.sortField === field) {
-        this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-      } else {
-        this.sortField = field;
-        this.sortDirection = 'asc';
-      }
-      this.filterOrders();
-    },
+    populateStatusFilter() {
+        const statusFilter = document.getElementById('status-filter');
+        if (!statusFilter) return;
 
-    toggleAll(checked) {
-      if (checked) {
-        this.selectedOrders = this.paginatedOrders.map(o => o.id);
-      } else {
-        this.selectedOrders = [];
-      }
-    },
+        statusFilter.innerHTML = `
+            <option value="">Tất cả trạng thái</option>
+            <option value="processing">Đang xử lý</option>
+            <option value="shipping">Đang giao</option>
+            <option value="arrived">Đã đến</option>
+            <option value="delivered">Đã giao</option>
+            <option value="cancelled">Đã hủy</option>
+            <option value="refund_pending">Chờ hoàn tiền</option>
+            <option value="refunded">Đã hoàn tiền</option>
+        `;
+    }
 
-    bulkAction(action) {
-      if (this.selectedOrders.length === 0) return;
+    // ==================== EVENT LISTENERS ====================
 
-      const selectedOrderObjects = this.orders.filter(o => 
-        this.selectedOrders.includes(o.id)
-      );
+    setupEventListeners() {
+        // Search
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            let timeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    this.filters.search = e.target.value;
+                    this.currentPage = 1;
+                    this.loadOrdersList().then(() => this.renderOrdersList());
+                }, 500);
+            });
+        }
 
-      switch (action) {
-        case 'processing':
-          selectedOrderObjects.forEach(order => {
-            if (order.status === 'pending') {
-              order.status = 'processing';
+        // Filters
+        const filterIds = ['status-filter', 'payment-filter', 'start-date', 'end-date'];
+        filterIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', (e) => {
+                    if (id === 'status-filter') this.filters.status = e.target.value;
+                    if (id === 'payment-filter') this.filters.paymentMethod = e.target.value;
+                    if (id === 'start-date') this.filters.startDate = e.target.value;
+                    if (id === 'end-date') this.filters.endDate = e.target.value;
+
+                    this.currentPage = 1;
+                    this.loadOrdersList().then(() => this.renderOrdersList());
+                });
             }
-          });
-          this.showNotification('Orders marked as processing!', 'success');
-          break;
-        case 'shipped':
-          selectedOrderObjects.forEach(order => {
-            if (order.status === 'processing') {
-              order.status = 'shipped';
-            }
-          });
-          this.showNotification('Orders marked as shipped!', 'success');
-          break;
-        case 'delivered':
-          selectedOrderObjects.forEach(order => {
-            if (order.status === 'shipped') {
-              order.status = 'delivered';
-            }
-          });
-          this.showNotification('Orders marked as delivered!', 'success');
-          break;
-      }
-
-      this.selectedOrders = [];
-      this.calculateStats();
-    },
-
-    viewOrder(order) {
-      console.log('View order:', order);
-      this.showNotification('Order details would open here', 'info');
-    },
-
-    trackOrder(order) {
-      console.log('Track order:', order);
-      this.showNotification('Order tracking would open here', 'info');
-    },
-
-    printInvoice(order) {
-      console.log('Print invoice for order:', order);
-      this.showNotification('Invoice would be generated and printed', 'info');
-    },
-
-    cancelOrder(order) {
-      if (confirm(`Are you sure you want to cancel order ${order.orderNumber}?`)) {
-        order.status = 'cancelled';
-        this.calculateStats();
-        this.showNotification('Order cancelled successfully!', 'success');
-      }
-    },
-
-    exportOrders() {
-      const csvContent = "data:text/csv;charset=utf-8," + 
-        "Order Number,Customer,Email,Items,Total,Status,Date\n" +
-        this.filteredOrders.map(o => 
-          `"${o.orderNumber}","${o.customer.name}","${o.customer.email}","${o.itemCount}","${o.total}","${o.status}","${o.orderDate}"`
-        ).join("\n");
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "orders.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      this.showNotification('Orders exported successfully!', 'success');
-    },
-
-    showNotification(message, type = 'info') {
-      if (typeof Swal !== 'undefined') {
-        Swal.fire({
-          title: message,
-          icon: type === 'success' ? 'success' : type === 'error' ? 'error' : 'info',
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 3000
         });
-      } else {
-        alert(message);
-      }
-    },
 
-    initCharts() {
-      // Prevent multiple chart initializations
-      if (this.chartsInitialized) return;
-      
-      this.initOrderTrendsChart();
-      this.initStatusChart();
-      this.chartsInitialized = true;
-    },
-
-    initOrderTrendsChart() {
-      const chartElement = document.getElementById('orderTrendsChart');
-      if (!chartElement) {
-        console.warn('Order trends chart element not found');
-        return;
-      }
-
-      // Clear any existing chart content
-      chartElement.innerHTML = '';
-
-      try {
-        const trendsData = {
-          series: [{
-            name: 'Orders',
-            data: [12, 19, 15, 27, 24, 32, 28]
-          }, {
-            name: 'Revenue',
-            data: [1200, 1900, 1500, 2700, 2400, 3200, 2800]
-          }],
-          chart: {
-            type: 'area',
-            height: 300,
-            toolbar: { show: false }
-          },
-          colors: ['#6366f1', '#10b981'],
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shadeIntensity: 1,
-              opacityFrom: 0.7,
-              opacityTo: 0.3,
+        // Checkboxes
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('order-checkbox')) {
+                const orderId = e.target.value;
+                if (e.target.checked) {
+                    this.selectedOrders.add(orderId);
+                } else {
+                    this.selectedOrders.delete(orderId);
+                }
+                this.updateBulkActions();
             }
-          },
-          stroke: {
-            curve: 'smooth',
-            width: 2
-          },
-          xaxis: {
-            categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-          },
-          yaxis: [{
-            title: {
-              text: 'Orders'
+
+            if (e.target.id === 'select-all-checkbox') {
+                const isChecked = e.target.checked;
+                this.data.ordersList.forEach(order => {
+                    if (isChecked) {
+                        this.selectedOrders.add(order._id);
+                    } else {
+                        this.selectedOrders.delete(order._id);
+                    }
+                });
+                this.updateBulkActions();
+                this.renderOrdersList();
             }
-          }, {
-            opposite: true,
-            title: {
-              text: 'Revenue ($)'
+        });
+
+        // Bulk actions
+        document.getElementById('bulk-ship-btn')?.addEventListener('click', () => this.bulkUpdateStatus('shipping'));
+        document.getElementById('bulk-deliver-btn')?.addEventListener('click', () => this.bulkUpdateStatus('delivered'));
+        document.getElementById('bulk-cancel-btn')?.addEventListener('click', () => this.bulkUpdateStatus('cancelled'));
+        document.getElementById('clear-selection-btn')?.addEventListener('click', () => {
+            this.selectedOrders.clear();
+            this.updateBulkActions();
+            this.renderOrdersList();
+        });
+    }
+
+    updateBulkActions() {
+        const bulkBar = document.getElementById('bulk-actions-bar');
+        const selectedCount = document.getElementById('selected-count');
+
+        if (bulkBar && selectedCount) {
+            if (this.selectedOrders.size > 0) {
+                bulkBar.classList.remove('d-none');
+                selectedCount.textContent = this.selectedOrders.size;
+            } else {
+                bulkBar.classList.add('d-none');
             }
-          }],
-          tooltip: {
-            y: [{
-              formatter: function (val) {
-                return val + " orders"
-              }
-            }, {
-              formatter: function (val) {
-                return "$" + val
-              }
-            }]
-          }
-        };
-
-        const chart = new ApexCharts(chartElement, trendsData);
-        chart.render();
-      } catch (error) {
-        console.error('Error rendering order trends chart:', error);
-      }
-    },
-
-    initStatusChart() {
-      const chartElement = document.getElementById('statusChart');
-      if (!chartElement) {
-        console.warn('Status chart element not found');
-        return;
-      }
-
-      // Clear any existing chart content
-      chartElement.innerHTML = '';
-
-      try {
-        const chartData = {
-          series: this.statusStats.map(stat => stat.count),
-          chart: {
-            type: 'donut',
-            height: 200
-          },
-          labels: this.statusStats.map(stat => stat.name),
-          colors: this.statusStats.map(stat => stat.color),
-          plotOptions: {
-            pie: {
-              donut: {
-                size: '70%'
-              }
-            }
-          },
-          legend: {
-            show: false
-          },
-          tooltip: {
-            y: {
-              formatter: function (val) {
-                return val + " orders"
-              }
-            }
-          }
-        };
-
-        const chart = new ApexCharts(chartElement, chartData);
-        chart.render();
-      } catch (error) {
-        console.error('Error rendering status chart:', error);
-      }
-    },
-
-    get paginatedOrders() {
-      const start = (this.currentPage - 1) * this.itemsPerPage;
-      const end = start + this.itemsPerPage;
-      return this.filteredOrders.slice(start, end);
-    },
-
-    get totalPages() {
-      return Math.ceil(this.filteredOrders.length / this.itemsPerPage);
-    },
-
-    get visiblePages() {
-      if (this.totalPages <= 1) return [1];
-      
-      const pages = [];
-      const delta = 2;
-      
-      // Always show first page
-      pages.push(1);
-      
-      if (this.totalPages <= 7) {
-        // If total pages is small, show all
-        for (let i = 2; i <= this.totalPages; i++) {
-          pages.push(i);
         }
-      } else {
-        // Complex pagination logic
-        if (this.currentPage <= 4) {
-          // Near the beginning
-          for (let i = 2; i <= 5; i++) {
-            pages.push(i);
-          }
-          pages.push('...');
-          pages.push(this.totalPages);
-        } else if (this.currentPage >= this.totalPages - 3) {
-          // Near the end
-          pages.push('...');
-          for (let i = this.totalPages - 4; i <= this.totalPages; i++) {
-            pages.push(i);
-          }
-        } else {
-          // In the middle
-          pages.push('...');
-          for (let i = this.currentPage - 1; i <= this.currentPage + 1; i++) {
-            pages.push(i);
-          }
-          pages.push('...');
-          pages.push(this.totalPages);
-        }
-      }
-      
-      return pages;
-    },
+    }
 
-    goToPage(page) {
-      if (page >= 1 && page <= this.totalPages) {
+    // ==================== ACTIONS ====================
+
+    async viewOrder(orderId) {
+        try {
+            const order = await OrdersService.getOrderDetail(orderId);
+            console.log('Order detail:', order);
+            // TODO: Show modal with order details
+            alert(`Chi tiết đơn hàng #${orderId.slice(-6).toUpperCase()}\n\nTổng: ${order.total.toLocaleString('vi-VN')}₫\nTrạng thái: ${order.status}`);
+        } catch (error) {
+            console.error('Error viewing order:', error);
+            alert('Có lỗi xảy ra!');
+        }
+    }
+
+    async updateStatus(orderId, newStatus) {
+        const statusText = this.getStatusText(newStatus);
+        if (!confirm(`Bạn có chắc muốn cập nhật trạng thái thành "${statusText}"?`)) return;
+
+        try {
+            await OrdersService.updateOrderStatus(orderId, newStatus);
+            alert('Cập nhật thành công!');
+            await this.loadOrdersList();
+            await this.loadStats();
+            await this.loadStatusDistribution();
+            this.renderUI();
+        } catch (error) {
+            console.error('Error updating status:', error);
+            alert('Có lỗi xảy ra!');
+        }
+    }
+
+    async bulkUpdateStatus(status) {
+        if (this.selectedOrders.size === 0) return;
+
+        const statusText = this.getStatusText(status);
+        if (!confirm(`Bạn có chắc muốn cập nhật ${this.selectedOrders.size} đơn hàng thành "${statusText}"?`)) return;
+
+        try {
+            const orderIds = Array.from(this.selectedOrders);
+            await OrdersService.bulkUpdateStatus(orderIds, status);
+            alert('Cập nhật thành công!');
+            this.selectedOrders.clear();
+            await this.loadOrdersList();
+            await this.loadStats();
+            await this.loadStatusDistribution();
+            this.renderUI();
+        } catch (error) {
+            console.error('Error bulk update:', error);
+            alert('Có lỗi xảy ra!');
+        }
+    }
+
+    async goToPage(page) {
+        if (!this.data.pagination) return;
+        if (page < 1 || page > this.data.pagination.totalPages) return;
+
         this.currentPage = page;
-      }
+        await this.loadOrdersList();
+        this.renderOrdersList();
+        document.getElementById('orders-list-tbody')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }));
 
-  // Search component for header
-  Alpine.data('searchComponent', () => ({
-    query: '',
-    results: [],
-    
-    search() {
-      console.log('Searching for:', this.query);
-      this.results = [];
+    // ==================== UTILITIES ====================
+
+    getStatusText(status) {
+        const texts = {
+            'processing': 'Đang xử lý',
+            'shipping': 'Đang giao',
+            'arrived': 'Đã đến',
+            'delivered': 'Đã giao',
+            'cancelled': 'Đã hủy',
+            'refund_pending': 'Chờ hoàn tiền',
+            'refunded': 'Đã hoàn tiền'
+        };
+        return texts[status] || status;
     }
-  }));
 
-  // Theme switch component
-  Alpine.data('themeSwitch', () => ({
-    currentTheme: 'light',
-
-    init() {
-      this.currentTheme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
-    },
-
-    toggle() {
-      this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-bs-theme', this.currentTheme);
-      localStorage.setItem('theme', this.currentTheme);
+    setText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
     }
-  }));
-});
+}
+
+// Auto-initialize
+if (typeof window !== 'undefined') {
+    window.OrdersManager = OrdersManager;
+}

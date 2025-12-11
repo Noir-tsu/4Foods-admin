@@ -23,6 +23,7 @@ import {
 import { ThemeManager } from './utils/theme-manager.js';
 import { ProductsManager } from './components/products.js';
 import { UsersManager } from './components/users.js';
+import { OrdersManager } from './components/orders.js';
 import { AnalyticsManager } from './components/analytics.js';
 import { DashboardManager } from './components/dashboard.js';
 import { NotificationManager } from './utils/notifications.js';
@@ -219,17 +220,13 @@ class AdminApp {
   }
 
   async initProductsPage() {
-        console.log('🏗️ Initializing Products Page...');
-        this.components.set('products', new ProductsManager());
+    console.log('🏗️ Initializing Products Page...');
+    this.components.set('products', new ProductsManager());
   }
 
   async initOrdersPage() {
-    try {
-      await import('./components/orders.js');
-      console.log('🛒 Orders page script loaded successfully');
-    } catch (error) {
-      console.error('Failed to load orders page script:', error);
-    }
+    console.log('🏗️ Initializing Orders Page...');
+    this.components.set('orders', new OrdersManager());
   }
 
   async initReportsPage() {

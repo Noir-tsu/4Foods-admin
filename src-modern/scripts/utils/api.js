@@ -34,5 +34,14 @@ export const ENDPOINTS = {
         LIST: '/products/list',
         BULK_ACTION: '/products/bulk-action',
         DELETE: '/products'
+    },
+    ORDERS: {
+        STATS: '/orders/stats',
+        TRENDS: '/orders/trends',
+        STATUS_DISTRIBUTION: '/orders/status-distribution',
+        LIST: '/orders/list',
+        DETAIL: '/orders/:id',
+        UPDATE_STATUS: '/orders/:id/status',
+        BULK_UPDATE: '/orders/bulk-update'
     }
 };
